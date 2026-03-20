@@ -20,6 +20,7 @@ The reference rendering implementation. Takes template + theme + content JSON an
   - Featured Content Caption → figure caption element
   - Background → CSS background (color, gradient, or image)
 - Render page/slide boundaries as visual separators
+- Render content within the actual layout grid with the brand theme applied, so what the user sees matches the final generated output
 
 ## Constraints
 - Uses native CSS grid/flex — NOT computed absolute positions from the layout engine
@@ -34,3 +35,9 @@ The reference rendering implementation. Takes template + theme + content JSON an
 4. Section-level theme overrides produce distinct visual treatments per section
 5. All 7 field types render with appropriate HTML elements
 6. Page/slide boundaries are visually distinct
+
+## References
+- JTBD 4 and Architecture → Shared Layout Engine section of `reqs-001.md`
+- `specs/design-principles.md` — HTML renderer is the reference implementation for visual correctness
+- `specs/html-preview-dev.md` — dev server that wraps this renderer with hot reload
+- `specs/pdf-generator.md` — uses this renderer's output via Playwright

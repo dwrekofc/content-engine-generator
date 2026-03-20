@@ -38,3 +38,9 @@ Generates PowerPoint (PPTX) files from template + theme + content inputs. Uses t
 6. All 7 field types are rendered as appropriate PPTX elements
 7. Generated .pptx opens correctly in PowerPoint/LibreOffice
 8. Side-by-side comparison of HTML preview and PPTX slide shows matching layout
+
+## References
+- JTBD 5 and Architecture sections of `reqs-001.md`
+- `specs/layout-engine-core.md` — provides the bounding boxes this generator consumes
+- `specs/html-renderer.md` — reference implementation for visual fidelity comparison
+- `specs/brand-theme.md` — theme token format applied to shapes

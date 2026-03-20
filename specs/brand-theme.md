@@ -14,6 +14,7 @@ Defines the JSON design token format for brand themes. A theme controls the visu
 - Convert JSON tokens to CSS custom properties for the HTML renderer
 - PPTX and PDF generators read JSON tokens directly (no CSS intermediary)
 - Include theme name and optional metadata (brand name, version)
+- Support AI-assisted theme generation from a brand style guide (a coding agent reads the style guide and produces the JSON token file)
 
 ## Constraints
 - Format is JSON design tokens — no CSS files, no Sass, no proprietary formats
@@ -30,3 +31,9 @@ Defines the JSON design token format for brand themes. A theme controls the visu
 5. PPTX generator reads theme tokens and applies them to shapes (fonts, colors, spacing)
 6. Changing a theme token visibly changes the HTML preview output
 7. The same theme produces consistent visual results across HTML and PPTX
+
+## References
+- JTBD 3 of `reqs-001.md`
+- `specs/design-principles.md` — themes never change structural arrangement
+- `specs/html-renderer.md` — consumes theme tokens as CSS custom properties
+- `specs/pptx-generator.md` — reads theme tokens directly for shape styling

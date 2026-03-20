@@ -12,7 +12,7 @@ The foundational framework for the layout engine. Defines the input/output contr
 - Recursively traverse the template tree (Document → Pages → Sections → children)
 - Compute Section layout: top-level block containers that stack vertically, full-width within the page canvas
 - Respect padding and spacing defined on containers
-- Produce a separate layout pass per output format (each with its own canvas size)
+- Produce a separate layout pass per output format (each with its own canvas size): PPTX=10×7.5in, PDF=A4 (8.27×11.69in), HTML=fixed width (configurable, e.g. 1440px)
 - Provide an extensible architecture where layout primitives (Flex, Grid, etc.) plug in as strategies
 
 ## Constraints
@@ -29,3 +29,8 @@ The foundational framework for the layout engine. Defines the input/output contr
 4. Padding/spacing is applied correctly to container bounds
 5. The framework supports plugging in additional layout strategies (Flex, Grid, Stack, Free-position)
 6. Layout engine runs in pure TypeScript without DOM/browser dependencies
+
+## References
+- Architecture → Shared Layout Engine section of `reqs-001.md`
+- `specs/layout-engine-primitives.md` — Flex, Grid, Stack, Free-position strategies that plug into this framework
+- `specs/design-principles.md` — fixed canvas per format, visual fidelity guarantee

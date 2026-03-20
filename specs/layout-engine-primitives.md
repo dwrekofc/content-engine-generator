@@ -27,3 +27,8 @@ Implements the four non-trivial layout primitives (Flex, Grid, Stack, Free-posit
 4. Free-position elements use their specified absolute coordinates within parent bounds
 5. Nested combinations (e.g., Grid containing Flex containing Stack) produce correct recursive positioning
 6. A visual diff test compares HTML renderer output to layout engine output for sample templates and confirms positional match within acceptable tolerance
+
+## References
+- Architecture → Shared Layout Engine section of `reqs-001.md`
+- `specs/layout-engine-core.md` — the core framework these primitives plug into
+- `specs/html-renderer.md` — reference implementation for fidelity comparison

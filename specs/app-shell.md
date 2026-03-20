@@ -33,3 +33,9 @@ The top-level application structure that hosts all three modes of the content en
 6. Content/Preview mode shows the live HTML preview with hot reload
 7. Generate mode allows choosing an output format and produces a downloadable file
 8. `bun run build` produces a production build without errors
+
+## References
+- JTBD 1, 4, 5 and Tech Stack section of `reqs-001.md`
+- `specs/template-builder-containers.md` — Template Builder mode
+- `specs/html-preview-dev.md` — Content/Preview mode
+- `specs/pptx-generator.md`, `specs/pdf-generator.md`, `specs/html-static-generator.md` — Generate mode outputs

@@ -25,3 +25,8 @@ The live wireframe preview within the template builder that shows labeled placeh
 3. Containers render in real CSS grid/flex layout (a 3-column grid shows 3 columns, not a vertical list)
 4. Nested containers are visually distinguishable within their parents
 5. Page/slide boundaries are visible in the wireframe
+
+## References
+- JTBD 1 of `reqs-001.md`
+- `specs/template-builder-containers.md` — the editor this wireframe preview is part of
+- `specs/html-renderer.md` — uses the same CSS layout primitives for structural consistency

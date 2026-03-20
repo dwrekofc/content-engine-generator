@@ -27,3 +27,7 @@ Generates PDF files by rendering the HTML preview via Playwright. This is a zero
 3. Visual output matches the HTML preview (fonts, colors, layout, images)
 4. PDF opens correctly in standard PDF viewers
 5. A4 page size is used by default
+
+## References
+- JTBD 5 of `reqs-001.md`
+- `specs/html-renderer.md` — the rendering engine Playwright captures to PDF

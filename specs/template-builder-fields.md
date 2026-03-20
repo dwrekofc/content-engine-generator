@@ -28,3 +28,8 @@ Adds content field slot components to the template builder, allowing users to dr
 5. User can define page/slide boundaries
 6. User can enable free-positioning for individual elements
 7. Exported JSON includes field metadata (required/optional, free-position flag)
+
+## References
+- JTBD 1 of `reqs-001.md`
+- `specs/template-builder-containers.md` — the editor this spec extends with field slot components
+- `specs/template-schema.md` — the JSON schema that must include field metadata

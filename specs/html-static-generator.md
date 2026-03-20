@@ -26,3 +26,7 @@ Generates a deployable static HTML site from the preview output. Multi-page temp
 3. Multi-page templates produce correctly linked HTML files
 4. Output has no external dependencies (self-contained)
 5. Output directory can be deployed to static hosting and renders correctly
+
+## References
+- JTBD 5 of `reqs-001.md`
+- `specs/html-renderer.md` — the rendering engine whose output is saved as static files

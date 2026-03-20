@@ -55,3 +55,9 @@ Defines the canonical JSON schema for layout templates — the structural bluepr
 5. The schema supports explicit page/slide boundaries
 6. A sample template JSON file exercises all primitives and field types
 7. The template builder, HTML renderer, layout engine, and PPTX generator all consume this schema
+
+## References
+- JTBD 1 and Architecture sections of `reqs-001.md`
+- `specs/design-principles.md` — cross-cutting constraints on field types and layout primitives
+- `specs/content-schema.md` — content JSON that fills this template's field slots
+- `specs/brand-theme.md` — theme JSON that styles this template's visual treatment

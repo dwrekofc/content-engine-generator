@@ -28,3 +28,8 @@ Defines the JSON content format that fills a template's field slots with actual 
 4. At least one sample content JSON file exists with realistic dummy data for a sample template
 5. The HTML preview can load and render a content JSON file
 6. The PPTX generator can consume a content JSON file
+
+## References
+- JTBD 6 of `reqs-001.md`
+- `specs/template-schema.md` — content field values map to this template's field slot IDs
+- `specs/html-renderer.md` — fills field slots with content values for preview

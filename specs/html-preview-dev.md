@@ -24,3 +24,8 @@ The development server that wraps the HTML renderer with hot reload capability. 
 3. Changing theme JSON triggers a visible re-styling without manual refresh
 4. Changing template JSON triggers a structural re-render without manual refresh
 5. Overflow is visually indicated when content exceeds container bounds
+
+## References
+- JTBD 4 of `reqs-001.md`
+- `specs/html-renderer.md` — the rendering engine this dev server wraps
+- `specs/app-shell.md` — Content/Preview mode hosts this preview

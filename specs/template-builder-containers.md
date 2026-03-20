@@ -29,3 +29,9 @@ Sets up the Puck-based visual editor and implements the core container editing e
 5. User can drag-to-reorder sections and containers
 6. JSON schema updates in real time as the user edits
 7. User can save a template to a JSON file and reload it
+
+## References
+- JTBD 1 of `reqs-001.md`
+- `specs/template-schema.md` — the JSON schema the builder must produce
+- `specs/template-builder-fields.md` — extends this editor with field slot components
+- `specs/template-builder-wireframe.md` — the live wireframe preview within this editor
