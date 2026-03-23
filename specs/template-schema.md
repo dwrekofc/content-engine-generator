@@ -15,7 +15,7 @@ Defines the canonical JSON schema for layout templates — the structural bluepr
 - Sections can contain fields, cards, and optional sub sections
 - Sub sections can contain fields and cards
 - Cards contain fields only
-- Nesting depth is capped at 3 levels (Section → Sub Section → Card)
+- Nesting depth is capped at 3 levels (Section → Sub Section → Card) [inferred from document hierarchy diagram]
 
 ### Content Model (Field Types)
 - Support 7 field types for sections: Title, Subtitle, Paragraph, Button (Text + Link), Featured Content (media), Featured Content Caption, Background
@@ -30,7 +30,7 @@ Defines the canonical JSON schema for layout templates — the structural bluepr
 - Flex arranges children in a single direction (row or column) with configurable gap/alignment
 - Grid arranges children in a defined NxM grid with configurable gap
 - Stack layers children vertically (top-down, z-index stacking)
-- Free-position enables absolute positioning within a container (explicit opt-in escape hatch)
+- Free-position is a container layout type (like Flex or Grid) where all children are absolutely positioned with explicit x/y/w/h coordinates — the escape hatch for elements that need precise placement (e.g., a text box floating over a slide)
 - Containers are composable: any container can nest inside any other container
 - Each container has a unique ID within the template
 

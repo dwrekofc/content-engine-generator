@@ -30,5 +30,6 @@ Implements the four non-trivial layout primitives (Flex, Grid, Stack, Free-posit
 
 ## References
 - Architecture → Shared Layout Engine section of `reqs-001.md`
+- `specs/design-principles.md` — visual fidelity across formats; structured by default
 - `specs/layout-engine-core.md` — the core framework these primitives plug into
 - `specs/html-renderer.md` — reference implementation for fidelity comparison

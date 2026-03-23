@@ -30,4 +30,5 @@ Generates PDF files by rendering the HTML preview via Playwright. This is a zero
 
 ## References
 - JTBD 5 of `reqs-001.md`
+- `specs/design-principles.md` — visual fidelity across formats; fixed canvas per format (A4 for PDF)
 - `specs/html-renderer.md` — the rendering engine Playwright captures to PDF

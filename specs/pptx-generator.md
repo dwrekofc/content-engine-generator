@@ -41,6 +41,7 @@ Generates PowerPoint (PPTX) files from template + theme + content inputs. Uses t
 
 ## References
 - JTBD 5 and Architecture sections of `reqs-001.md`
+- `specs/design-principles.md` — visual fidelity across formats; fixed canvas per format
 - `specs/layout-engine-core.md` — provides the bounding boxes this generator consumes
 - `specs/html-renderer.md` — reference implementation for visual fidelity comparison
 - `specs/brand-theme.md` — theme token format applied to shapes

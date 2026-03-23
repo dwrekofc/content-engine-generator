@@ -32,6 +32,7 @@ Sets up the Puck-based visual editor and implements the core container editing e
 
 ## References
 - JTBD 1 of `reqs-001.md`
+- `specs/design-principles.md` — structured by default, freeform by exception; composable layout primitives
 - `specs/template-schema.md` — the JSON schema the builder must produce
 - `specs/template-builder-fields.md` — extends this editor with field slot components
 - `specs/template-builder-wireframe.md` — the live wireframe preview within this editor

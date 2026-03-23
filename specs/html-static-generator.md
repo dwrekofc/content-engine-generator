@@ -29,4 +29,5 @@ Generates a deployable static HTML site from the preview output. Multi-page temp
 
 ## References
 - JTBD 5 of `reqs-001.md`
+- `specs/design-principles.md` — visual fidelity across formats; JSON universal format
 - `specs/html-renderer.md` — the rendering engine whose output is saved as static files

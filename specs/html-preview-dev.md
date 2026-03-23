@@ -27,5 +27,6 @@ The development server that wraps the HTML renderer with hot reload capability. 
 
 ## References
 - JTBD 4 of `reqs-001.md`
+- `specs/design-principles.md` — HTML renderer is the reference implementation for visual correctness
 - `specs/html-renderer.md` — the rendering engine this dev server wraps
 - `specs/app-shell.md` — Content/Preview mode hosts this preview

@@ -31,5 +31,6 @@ Defines the JSON content format that fills a template's field slots with actual 
 
 ## References
 - JTBD 6 of `reqs-001.md`
+- `specs/design-principles.md` — JSON universal format; Phase 1 content is disposable dummy data
 - `specs/template-schema.md` — content field values map to this template's field slot IDs
 - `specs/html-renderer.md` — fills field slots with content values for preview
