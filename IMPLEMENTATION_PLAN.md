@@ -2,10 +2,10 @@
 
 # Implementation Plan — Content Engine Generator
 
-> **Status:** Phase 3 (HTML Renderer) complete. Phase 2 (Layout Engine) complete. Phase 1 (Schemas) complete. Phase 0 scaffolding partially complete.
+> **Status:** Phase 5-1 (PPTX Generator) complete. Phase 3 (HTML Renderer) complete. Phase 2 (Layout Engine) complete. Phase 1 (Schemas) complete. Phase 0 scaffolding partially complete.
 > **Precedence:** reqs-001 > specs > code. Specs conform to reqs. Code mismatches are flagged, not resolved.
 > **Last updated:** 2026-03-23
-> **Last verified:** 2026-03-23 — P3 fully implemented with 198 passing tests (59 HTML renderer + 74 layout engine + 65 schemas).
+> **Last verified:** 2026-03-23 — P5-1 fully implemented with 215 passing tests (17 PPTX generator + 59 HTML renderer + 74 layout engine + 65 schemas).
 
 ### Execution Priority (recommended build order)
 
@@ -166,22 +166,20 @@ The HTML renderer is the source of truth for visual correctness. All other forma
 
 ### PPTX (Hero Output)
 
-- [ ] **P5-1: PPTX Generator** `src/lib/generators/pptx-generator.ts`
-  - Inputs: template JSON, theme JSON, content JSON
-  - Call layout engine for PPTX canvas (10×7.5in default, configurable)
-  - Create slides from page/slide boundaries
-  - Place shapes at layout engine's computed coordinates via PptxGenJS
-  - Apply theme tokens to shapes (fonts, colors, spacing)
-  - Apply per-section theme overrides
-  - All 7 field types → PPTX elements:
-    - Title/Subtitle → text boxes with heading styles
-    - Paragraph → text boxes with body styles
-    - Button → styled text box/shape with link
-    - Featured Content → image placeholder
-    - Featured Content Caption → text box
-    - Background → slide/shape background fill
-  - Output: valid .pptx file
-  - Generator does NOT compute layout — positions from layout engine only
+- [x] **P5-1: PPTX Generator** `src/lib/generators/pptx-generator.ts`
+  - ✅ `generatePPTX()` — inputs: template JSON, theme JSON, content JSON; output: valid .pptx buffer
+  - ✅ Uses `computeLayout()` for positioning; converts canvas coords to inches via scaling
+  - ✅ All 7 field types rendered:
+    - title/subtitle/paragraph → text boxes
+    - button → rounded rect with hyperlink
+    - featured-content → image placeholder
+    - featured-content-caption → text box
+    - background → rect fill
+  - ✅ Theme tokens applied to all shapes (fonts, colors, spacing)
+  - ✅ Per-section theme overrides with deep merge
+  - ✅ Default canvas 960×720 (96 DPI equiv of 10×7.5in) when template has no `canvasSize.pptx`
+  - ⚠️ PptxGenJS gradient fills not supported in typed API — solid color fallback from first gradient stop
+  - ✅ 17 tests: all field types, all layout primitives, theme overrides, custom slide dimensions, full sample fixture
   - Spec: `pptx-generator.md`
 
 ### PDF
@@ -354,7 +352,7 @@ These items are spec-level issues found during analysis. Not implementation task
 | `layout-engine-primitives.md` | P2-2 – P2-6 | ✅ Complete |
 | `html-renderer.md` | P3-1 – P3-4 | ✅ P3-1–P3-3 Complete |
 | `html-preview-dev.md` | P4-1, P4-2 | Not started |
-| `pptx-generator.md` | P5-1 | Not started |
+| `pptx-generator.md` | P5-1 | ✅ Complete |
 | `pdf-generator.md` | P5-2 | Not started |
 | `html-static-generator.md` | P5-3 | Not started |
 | `app-shell.md` | P6-1, P6-5, P6-6 | Not started |
@@ -369,7 +367,8 @@ All 16 specs are covered. No orphan specs. No missing plan items.
 
 ## Notes
 
-- **Phase 3 complete.** HTML renderer (layout structure, theme application, content filling) implemented with 59 tests. Total: 198 tests passing.
+- **P5-1 complete.** PPTX generator implemented with 17 tests. pptxgenjs v4.0.1 installed as dependency. Total: 215 tests passing.
+- **Phase 3 complete.** HTML renderer (layout structure, theme application, content filling) implemented with 59 tests.
 - **Phase 2 complete.** Layout engine core + all 5 primitives implemented with 74 tests.
 - **Phase 1 complete.** All schemas, validation, theme-to-CSS, and sample fixtures implemented with 65 tests.
 - **Bug fix:** `sectionOverrideToCSS` was missing from `src/index.ts` barrel exports — now exported.

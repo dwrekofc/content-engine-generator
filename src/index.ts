@@ -1,3 +1,9 @@
+// PPTX Generator
+export {
+	type GeneratePPTXOptions,
+	type GeneratePPTXResult,
+	generatePPTX,
+} from "./lib/generators/pptx-generator";
 // Layout Engine
 export { computeLayout } from "./lib/layout-engine/core";
 export type {
