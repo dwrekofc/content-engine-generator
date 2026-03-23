@@ -57,3 +57,5 @@ export {
 	type DevServerOptions,
 	startDevServer,
 } from "./lib/preview/dev-server";
+// API Server
+export { type APIServerInstance, startAPIServer } from "./server/api";

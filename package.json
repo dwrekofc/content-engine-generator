@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bunx vite",
+    "dev:api": "bun run src/server/api.ts",
     "dev:lib": "bun run --watch src/index.ts",
     "build": "bunx vite build",
     "build:lib": "bun build src/index.ts --outdir dist",

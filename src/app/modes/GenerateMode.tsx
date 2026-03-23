@@ -22,13 +22,37 @@ const FORMAT_DESCRIPTIONS: Record<OutputFormat, string> = {
 	"html-static": "Saves the HTML preview as deployable static files",
 };
 
+const FILE_EXTENSIONS: Record<OutputFormat, string> = {
+	pptx: "pptx",
+	pdf: "pdf",
+	"html-static": "html",
+};
+
+const MIME_TYPES: Record<OutputFormat, string> = {
+	pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+	pdf: "application/pdf",
+	"html-static": "text/html",
+};
+
 /**
- * Generate mode — select output format and produce final assets.
+ * Triggers a browser file download from a Blob.
+ */
+function downloadBlob(blob: Blob, filename: string) {
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = filename;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
+}
+
+/**
+ * Generate mode — select output format, call the API server, and download results.
  *
- * PPTX and PDF generators require Node/Bun APIs (PptxGenJS, Playwright)
- * that aren't available in the browser. In-browser generation is limited
- * to HTML static output. PPTX and PDF generation would be triggered via
- * a server API endpoint in a full deployment. For now, they show status.
+ * All three formats (PPTX, PDF, HTML static) are generated server-side via
+ * POST /api/generate. The API server must be running (`bun run dev:api`).
  */
 export function GenerateMode({ state, updateState }: GenerateModeProps) {
 	const [format, setFormat] = useState<OutputFormat>("html-static");
@@ -45,22 +69,33 @@ export function GenerateMode({ state, updateState }: GenerateModeProps) {
 		setMessage("");
 
 		try {
-			if (format === "html-static") {
-				// HTML static can preview the output inline
-				setMessage(
-					"HTML static site generation requires a server-side API. Use the CLI: generateHTMLStatic()",
-				);
-				setStatus("done");
-			} else if (format === "pptx") {
-				setMessage("PPTX generation requires server-side PptxGenJS. Use the CLI: generatePPTX()");
-				setStatus("done");
-			} else if (format === "pdf") {
-				setMessage("PDF generation requires server-side Playwright. Use the CLI: generatePDF()");
-				setStatus("done");
+			const response = await fetch("/api/generate", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ format, template, theme, content }),
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => null);
+				const errorMsg = errorData?.error || `Server returned ${response.status}`;
+				throw new Error(errorMsg);
 			}
+
+			const blob = await response.blob();
+			const ext = FILE_EXTENSIONS[format];
+			const mimeType = MIME_TYPES[format];
+			const typedBlob = new Blob([blob], { type: mimeType });
+			downloadBlob(typedBlob, `output.${ext}`);
+
+			setStatus("done");
+			setMessage(`${FORMAT_LABELS[format]} generated and downloaded.`);
 		} catch (err) {
 			setStatus("error");
-			setMessage(err instanceof Error ? err.message : String(err));
+			if (err instanceof TypeError && err.message.includes("fetch")) {
+				setMessage("Cannot reach API server. Start it with: bun run dev:api");
+			} else {
+				setMessage(err instanceof Error ? err.message : String(err));
+			}
 		}
 	}, [template, theme, content, format]);
 
