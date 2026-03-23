@@ -6,6 +6,12 @@ export type {
 	LayoutBounds,
 	PositionedElement,
 } from "./lib/layout-engine/types";
+// HTML Renderer
+export {
+	type RenderHTMLOptions,
+	renderHTML,
+	renderHTMLFragment,
+} from "./lib/renderers/html-renderer";
 export { type BrandTheme, BrandThemeSchema, type SectionOverride } from "./lib/schemas/brand-theme";
 export {
 	type Content,
