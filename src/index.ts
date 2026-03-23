@@ -1,3 +1,9 @@
+// HTML Static Site Generator
+export {
+	type GenerateHTMLStaticOptions,
+	type GenerateHTMLStaticResult,
+	generateHTMLStatic,
+} from "./lib/generators/html-static-generator";
 // PPTX Generator
 export {
 	type GeneratePPTXOptions,
