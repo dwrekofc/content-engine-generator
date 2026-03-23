@@ -44,3 +44,9 @@ export {
 	TemplateSchema,
 } from "./lib/schemas/template-schema";
 export { sectionOverrideToCSS, themeToCSS } from "./lib/themes/theme-to-css";
+// Preview Dev Server
+export {
+	type DevServerInstance,
+	type DevServerOptions,
+	startDevServer,
+} from "./lib/preview/dev-server";

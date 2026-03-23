@@ -115,6 +115,13 @@ function getElementById(layout: PositionedElement[], id: string): PositionedElem
 	return layout.find((el) => el.id === id);
 }
 
+/** Asserts element exists and returns it (non-optional) for tests that check containment */
+function getElementByIdStrict(layout: PositionedElement[], id: string): PositionedElement {
+	const el = layout.find((e) => e.id === id);
+	if (!el) throw new Error(`Element "${id}" not found in layout`);
+	return el;
+}
+
 // ── Tests ───────────────────────────────────────────────────────────
 
 describe("visual fidelity diff — structural parity", () => {
@@ -181,33 +188,29 @@ describe("visual fidelity diff — parent-child hierarchy", () => {
 
 	test("all sections have a page or section as parent", () => {
 		for (const section of getElements(layout, "section")) {
-			const parent = getElementById(layout, section.parentId!);
-			expect(parent).toBeDefined();
-			expect(["page", "section"]).toContain(parent?.type);
+			const parent = getElementByIdStrict(layout, section.parentId as string);
+			expect(["page", "section"]).toContain(parent.type);
 		}
 	});
 
 	test("all fields have a section as parent", () => {
 		for (const field of getElements(layout, "field")) {
-			const parent = getElementById(layout, field.parentId!);
-			expect(parent).toBeDefined();
-			expect(parent?.type).toBe("section");
+			const parent = getElementByIdStrict(layout, field.parentId as string);
+			expect(parent.type).toBe("section");
 		}
 	});
 
 	test("all cards have a section as parent", () => {
 		for (const card of getElements(layout, "card")) {
-			const parent = getElementById(layout, card.parentId!);
-			expect(parent).toBeDefined();
-			expect(parent?.type).toBe("section");
+			const parent = getElementByIdStrict(layout, card.parentId as string);
+			expect(parent.type).toBe("section");
 		}
 	});
 
 	test("all card-fields have a card as parent", () => {
 		for (const field of getElements(layout, "card-field")) {
-			const parent = getElementById(layout, field.parentId!);
-			expect(parent).toBeDefined();
-			expect(parent?.type).toBe("card");
+			const parent = getElementByIdStrict(layout, field.parentId as string);
+			expect(parent.type).toBe("card");
 		}
 	});
 
@@ -282,8 +285,7 @@ describe("visual fidelity diff — free-position coordinate match", () => {
 	});
 
 	test("layout engine free-position children are within parent bounds", () => {
-		const freeSection = getElementById(layout, "free-section");
-		expect(freeSection).toBeDefined();
+		const freeSection = getElementByIdStrict(layout, "free-section");
 
 		// Get children of the free-position section
 		const children = layout.filter((el) => el.parentId === "free-section" && el.type === "section");
@@ -291,19 +293,18 @@ describe("visual fidelity diff — free-position coordinate match", () => {
 
 		for (const child of children) {
 			// Child should be within the parent section bounds (with padding)
-			expect(child.x).toBeGreaterThanOrEqual(freeSection?.x);
-			expect(child.y).toBeGreaterThanOrEqual(freeSection?.y);
+			expect(child.x).toBeGreaterThanOrEqual(freeSection.x);
+			expect(child.y).toBeGreaterThanOrEqual(freeSection.y);
 		}
 	});
 
 	test("layout engine free-position children preserve relative offsets from template", () => {
-		const freeSection = getElementById(layout, "free-section");
-		expect(freeSection).toBeDefined();
+		const freeSection = getElementByIdStrict(layout, "free-section");
 
 		const children = layout.filter((el) => el.parentId === "free-section" && el.type === "section");
 
 		// Template specifies x:50 for both children — they should have the same x offset from parent
-		const xOffsets = children.map((c) => c.x - freeSection?.x);
+		const xOffsets = children.map((c) => c.x - freeSection.x);
 		// Both have x=50 in template, so after adding parent padding (20), both start at parent.x + 20 + 50
 		expect(xOffsets[0]).toBe(xOffsets[1]);
 	});
@@ -333,8 +334,8 @@ describe("visual fidelity diff — multi-format canvas consistency", () => {
 		const smallLayout = computeLayout(sampleTemplate, smallCanvas);
 		const largeLayout = computeLayout(sampleTemplate, largeCanvas);
 
-		const smallPage = smallLayout.find((el) => el.type === "page")!;
-		const largePage = largeLayout.find((el) => el.type === "page")!;
+		const smallPage = getElementByIdStrict(smallLayout, sampleTemplate.pages[0].id);
+		const largePage = getElementByIdStrict(largeLayout, sampleTemplate.pages[0].id);
 
 		expect(smallPage.width).toBe(800);
 		expect(smallPage.height).toBe(600);
@@ -371,52 +372,48 @@ describe("visual fidelity diff — containment verification", () => {
 	test("all fields are contained within their parent section bounds", () => {
 		const tolerance = 1; // 1px tolerance for floating point
 		for (const field of getElements(layout, "field")) {
-			const parent = getElementById(layout, field.parentId!);
-			expect(parent).toBeDefined();
+			const parent = getElementByIdStrict(layout, field.parentId as string);
 
-			expect(field.x).toBeGreaterThanOrEqual(parent?.x - tolerance);
-			expect(field.y).toBeGreaterThanOrEqual(parent?.y - tolerance);
-			expect(field.x + field.width).toBeLessThanOrEqual(parent?.x + parent?.width + tolerance);
+			expect(field.x).toBeGreaterThanOrEqual(parent.x - tolerance);
+			expect(field.y).toBeGreaterThanOrEqual(parent.y - tolerance);
+			expect(field.x + field.width).toBeLessThanOrEqual(parent.x + parent.width + tolerance);
 		}
 	});
 
 	test("all cards are contained within their parent section bounds", () => {
 		const tolerance = 1;
 		for (const card of getElements(layout, "card")) {
-			const parent = getElementById(layout, card.parentId!);
-			expect(parent).toBeDefined();
+			const parent = getElementByIdStrict(layout, card.parentId as string);
 
-			expect(card.x).toBeGreaterThanOrEqual(parent?.x - tolerance);
-			expect(card.y).toBeGreaterThanOrEqual(parent?.y - tolerance);
-			expect(card.x + card.width).toBeLessThanOrEqual(parent?.x + parent?.width + tolerance);
+			expect(card.x).toBeGreaterThanOrEqual(parent.x - tolerance);
+			expect(card.y).toBeGreaterThanOrEqual(parent.y - tolerance);
+			expect(card.x + card.width).toBeLessThanOrEqual(parent.x + parent.width + tolerance);
 		}
 	});
 
 	test("all card-fields are contained within their parent card bounds", () => {
 		const tolerance = 1;
 		for (const field of getElements(layout, "card-field")) {
-			const parent = getElementById(layout, field.parentId!);
-			expect(parent).toBeDefined();
+			const parent = getElementByIdStrict(layout, field.parentId as string);
 
-			expect(field.x).toBeGreaterThanOrEqual(parent?.x - tolerance);
-			expect(field.y).toBeGreaterThanOrEqual(parent?.y - tolerance);
-			expect(field.x + field.width).toBeLessThanOrEqual(parent?.x + parent?.width + tolerance);
+			expect(field.x).toBeGreaterThanOrEqual(parent.x - tolerance);
+			expect(field.y).toBeGreaterThanOrEqual(parent.y - tolerance);
+			expect(field.x + field.width).toBeLessThanOrEqual(parent.x + parent.width + tolerance);
 		}
 	});
 
 	test("child sections are contained within their parent section bounds", () => {
 		const tolerance = 1;
 		const childSections = getElements(layout, "section").filter((s) => {
-			const parent = getElementById(layout, s.parentId!);
+			const parent = getElementById(layout, s.parentId as string);
 			return parent?.type === "section";
 		});
 
 		for (const child of childSections) {
-			const parent = getElementById(layout, child.parentId!);
-			expect(parent).toBeDefined();
+			const parent = getElementByIdStrict(layout, child.parentId as string);
 
-			expect(child.x).toBeGreaterThanOrEqual(parent?.x - tolerance);
-			expect(child.y).toBeGreaterThanOrEqual(parent?.y - tolerance);
+			expect(child.x).toBeGreaterThanOrEqual(parent.x - tolerance);
+			expect(child.y).toBeGreaterThanOrEqual(parent.y - tolerance);
 		}
 	});
 });
