@@ -15,6 +15,7 @@
     "typescript": "latest"
   },
   "dependencies": {
+    "playwright": "^1.58.2",
     "pptxgenjs": "^4.0.1",
     "zod": "^4.3.6"
   }

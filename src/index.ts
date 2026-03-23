@@ -4,6 +4,13 @@ export {
 	type GenerateHTMLStaticResult,
 	generateHTMLStatic,
 } from "./lib/generators/html-static-generator";
+// PDF Generator
+export {
+	type GeneratePDFOptions,
+	type GeneratePDFResult,
+	generatePDF,
+	generatePDFFromURL,
+} from "./lib/generators/pdf-generator";
 // PPTX Generator
 export {
 	type GeneratePPTXOptions,
