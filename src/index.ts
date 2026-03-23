@@ -1,3 +1,11 @@
+// Layout Engine
+export { computeLayout } from "./lib/layout-engine/core";
+export type {
+	CanvasSize,
+	ElementType,
+	LayoutBounds,
+	PositionedElement,
+} from "./lib/layout-engine/types";
 export { type BrandTheme, BrandThemeSchema, type SectionOverride } from "./lib/schemas/brand-theme";
 export {
 	type Content,
@@ -17,4 +25,4 @@ export {
 	type Template,
 	TemplateSchema,
 } from "./lib/schemas/template-schema";
-export { themeToCSS } from "./lib/themes/theme-to-css";
+export { sectionOverrideToCSS, themeToCSS } from "./lib/themes/theme-to-css";
