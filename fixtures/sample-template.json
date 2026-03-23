@@ -1,0 +1,161 @@
+{
+	"id": "sample-deck",
+	"name": "Sample Marketing Deck",
+	"description": "A multi-page presentation template exercising all layout primitives and field types",
+	"canvasSize": {
+		"pptx": { "width": 914.4, "height": 685.8 },
+		"pdf": { "width": 595.28, "height": 841.89 },
+		"html": { "width": 1280, "height": 720 }
+	},
+	"pages": [
+		{
+			"id": "page-1",
+			"name": "Hero Slide",
+			"sections": [
+				{
+					"id": "hero-section",
+					"name": "hero",
+					"layout": "stack",
+					"fields": [
+						{ "id": "hero-bg", "type": "background", "required": true },
+						{ "id": "hero-title", "type": "title", "required": true, "label": "Hero Title" },
+						{ "id": "hero-subtitle", "type": "subtitle", "required": false, "label": "Tagline" }
+					],
+					"cards": [],
+					"children": []
+				}
+			]
+		},
+		{
+			"id": "page-2",
+			"name": "Features",
+			"sections": [
+				{
+					"id": "features-header",
+					"name": "features-header",
+					"layout": "section",
+					"fields": [
+						{ "id": "features-title", "type": "title", "required": true },
+						{ "id": "features-subtitle", "type": "subtitle", "required": false }
+					],
+					"cards": [],
+					"children": []
+				},
+				{
+					"id": "features-grid",
+					"name": "features-grid",
+					"layout": "grid",
+					"gridConfig": {
+						"columns": 3,
+						"rows": 1,
+						"gap": 24
+					},
+					"fields": [],
+					"cards": [
+						{
+							"id": "feature-card-1",
+							"fields": [
+								{ "id": "fc1-icon", "type": "featured-content", "required": true },
+								{ "id": "fc1-title", "type": "title", "required": true },
+								{ "id": "fc1-desc", "type": "paragraph", "required": true }
+							]
+						},
+						{
+							"id": "feature-card-2",
+							"fields": [
+								{ "id": "fc2-icon", "type": "featured-content", "required": true },
+								{ "id": "fc2-title", "type": "title", "required": true },
+								{ "id": "fc2-desc", "type": "paragraph", "required": true }
+							]
+						},
+						{
+							"id": "feature-card-3",
+							"fields": [
+								{ "id": "fc3-icon", "type": "featured-content", "required": true },
+								{ "id": "fc3-title", "type": "title", "required": true },
+								{ "id": "fc3-desc", "type": "paragraph", "required": true }
+							]
+						}
+					],
+					"children": []
+				}
+			]
+		},
+		{
+			"id": "page-3",
+			"name": "Content Showcase",
+			"sections": [
+				{
+					"id": "showcase-section",
+					"name": "showcase",
+					"layout": "flex",
+					"flexConfig": {
+						"direction": "row",
+						"gap": 32,
+						"align": "center"
+					},
+					"fields": [
+						{ "id": "showcase-image", "type": "featured-content", "required": true },
+						{ "id": "showcase-caption", "type": "featured-content-caption", "required": false }
+					],
+					"cards": [],
+					"children": [
+						{
+							"id": "showcase-text-group",
+							"layout": "flex",
+							"flexConfig": {
+								"direction": "column",
+								"gap": 16
+							},
+							"fields": [
+								{ "id": "showcase-title", "type": "title", "required": true },
+								{ "id": "showcase-body", "type": "paragraph", "required": true },
+								{ "id": "showcase-cta", "type": "button", "required": false, "label": "CTA Button" }
+							],
+							"cards": [],
+							"children": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "page-4",
+			"name": "Free Layout Demo",
+			"sections": [
+				{
+					"id": "free-section",
+					"name": "free-demo",
+					"layout": "free-position",
+					"fields": [
+						{ "id": "free-bg", "type": "background", "required": true }
+					],
+					"cards": [],
+					"children": [
+						{
+							"id": "free-title-box",
+							"layout": "section",
+							"position": { "x": 50, "y": 30, "width": 400, "height": 80 },
+							"fields": [
+								{ "id": "free-title", "type": "title", "required": true }
+							],
+							"cards": [],
+							"children": []
+						},
+						{
+							"id": "free-body-box",
+							"layout": "section",
+							"position": { "x": 50, "y": 130, "width": 500, "height": 200 },
+							"fields": [
+								{ "id": "free-body", "type": "paragraph", "required": true },
+								{ "id": "free-btn", "type": "button", "required": false }
+							],
+							"cards": [],
+							"children": []
+						}
+					]
+				}
+			]
+		}
+	]
+}

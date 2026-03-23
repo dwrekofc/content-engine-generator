@@ -1,0 +1,122 @@
+{
+	"templateRef": "sample-deck",
+	"themeRef": "corporate-blue",
+	"pages": [
+		{
+			"pageId": "page-1",
+			"sections": [
+				{
+					"sectionId": "hero-section",
+					"fields": {
+						"hero-bg": { "type": "background", "value": "linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%)" },
+						"hero-title": { "type": "title", "text": "Transform Your Business" },
+						"hero-subtitle": { "type": "subtitle", "text": "The platform that powers growth for modern teams" }
+					},
+					"cards": [],
+					"children": []
+				}
+			]
+		},
+		{
+			"pageId": "page-2",
+			"sections": [
+				{
+					"sectionId": "features-header",
+					"fields": {
+						"features-title": { "type": "title", "text": "Why Choose Us" },
+						"features-subtitle": { "type": "subtitle", "text": "Built for teams who demand excellence" }
+					},
+					"cards": [],
+					"children": []
+				},
+				{
+					"sectionId": "features-grid",
+					"fields": {},
+					"cards": [
+						{
+							"cardId": "feature-card-1",
+							"fields": {
+								"fc1-icon": { "type": "featured-content", "src": "/assets/icon-speed.svg", "alt": "Speed icon" },
+								"fc1-title": { "type": "title", "text": "Lightning Fast" },
+								"fc1-desc": { "type": "paragraph", "text": "Our platform processes requests in milliseconds, ensuring your team never waits." }
+							}
+						},
+						{
+							"cardId": "feature-card-2",
+							"fields": {
+								"fc2-icon": { "type": "featured-content", "src": "/assets/icon-secure.svg", "alt": "Security icon" },
+								"fc2-title": { "type": "title", "text": "Enterprise Security" },
+								"fc2-desc": { "type": "paragraph", "text": "Bank-grade encryption and compliance certifications protect your data at every layer." }
+							}
+						},
+						{
+							"cardId": "feature-card-3",
+							"fields": {
+								"fc3-icon": { "type": "featured-content", "src": "/assets/icon-scale.svg", "alt": "Scale icon" },
+								"fc3-title": { "type": "title", "text": "Infinite Scale" },
+								"fc3-desc": { "type": "paragraph", "text": "From startup to enterprise, our infrastructure scales seamlessly with your growth." }
+							}
+						}
+					],
+					"children": []
+				}
+			]
+		},
+		{
+			"pageId": "page-3",
+			"sections": [
+				{
+					"sectionId": "showcase-section",
+					"fields": {
+						"showcase-image": { "type": "featured-content", "src": "/assets/dashboard-preview.png", "alt": "Dashboard preview" },
+						"showcase-caption": { "type": "featured-content-caption", "text": "Real-time analytics dashboard" }
+					},
+					"cards": [],
+					"children": [
+						{
+							"sectionId": "showcase-text-group",
+							"fields": {
+								"showcase-title": { "type": "title", "text": "See Everything at a Glance" },
+								"showcase-body": { "type": "paragraph", "text": "Our intuitive dashboard gives you real-time insights into every metric that matters. Track performance, identify trends, and make data-driven decisions faster than ever." },
+								"showcase-cta": { "type": "button", "text": "Start Free Trial", "url": "https://example.com/trial" }
+							},
+							"cards": [],
+							"children": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"pageId": "page-4",
+			"sections": [
+				{
+					"sectionId": "free-section",
+					"fields": {
+						"free-bg": { "type": "background", "value": "#f8fafc" }
+					},
+					"cards": [],
+					"children": [
+						{
+							"sectionId": "free-title-box",
+							"fields": {
+								"free-title": { "type": "title", "text": "Ready to Get Started?" }
+							},
+							"cards": [],
+							"children": []
+						},
+						{
+							"sectionId": "free-body-box",
+							"fields": {
+								"free-body": { "type": "paragraph", "text": "Join thousands of teams who trust our platform to power their most critical workflows. No credit card required." },
+								"free-btn": { "type": "button", "text": "Sign Up Free", "url": "https://example.com/signup" }
+							},
+							"cards": [],
+							"children": []
+						}
+					]
+				}
+			]
+		}
+	]
+}

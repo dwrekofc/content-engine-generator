@@ -3,12 +3,14 @@
 
 0b. Study @IMPLEMENTATION_PLAN.md.
 
-0c. For reference, the application source code is in `src/*`.
+0c. For reference, the application source code is in `src/*`. The shared layout engine is the core IP — changes to it must be verified against both the HTML renderer and PPTX generator to ensure visual fidelity parity.
+
+0d. Do NOT read `.planning/` — specs are the source of truth for the build loop. Requirements have already been reconciled into specs.
 
 1. Your task is to implement functionality per the specifications using parallel subagents. Follow @IMPLEMENTATION_PLAN.md and choose the most important item to address. Before making changes, search the codebase (don't assume not implemented) using Sonnet subagents. You may use up to 500 parallel Sonnet subagents for searches/reads and only 1 Sonnet subagent for build/tests. Use Opus subagents when complex reasoning is needed (debugging, architectural decisions).
 2. After implementing functionality or resolving problems, run the tests for that unit of code that was improved. If functionality is missing then it's your job to add it as per the application specifications. Ultrathink.
 3. When you discover issues, immediately update @IMPLEMENTATION_PLAN.md with your findings using a subagent. When resolved, update and remove the item.
-4. When the tests pass, update @IMPLEMENTATION_PLAN.md, then `git add -A` then `git commit` with a message describing the changes. After the commit, `git push`.
+4. When the tests pass, update @IMPLEMENTATION_PLAN.md, then stage specific files (prefer `git add <files>` over `git add -A` to avoid committing generated output files, node_modules, or .env), then `git commit` with a message describing the changes. After the commit, `git push`.
 
 99999. Important: When authoring documentation, capture the why — tests and implementation importance.
 999999. Important: Single sources of truth, no migrations/adapters. If tests unrelated to your work fail, resolve them as part of the increment.
@@ -21,3 +23,5 @@
 9999999999999. When @IMPLEMENTATION_PLAN.md becomes large periodically clean out the items that are completed from the file using a subagent.
 99999999999999. If you find inconsistencies in the specs/* then use an Opus 4.6 subagent with 'ultrathink' requested to update the specs.
 999999999999999. IMPORTANT: Keep @AGENTS.md operational only — status updates and progress notes belong in `IMPLEMENTATION_PLAN.md`. A bloated AGENTS.md pollutes every future loop's context.
+9999999999999999. PROJECT-SPECIFIC: This project uses Bun as runtime, Puck for the visual template builder, PptxGenJS for PPTX generation, and Playwright for PDF generation. Use `bun test` for tests, `bun run tsc --noEmit` for typechecking, and `bunx biome check .` for linting. The shared layout engine must produce identical bounding boxes for both HTML and PPTX renderers — always verify both outputs when changing layout logic.
+99999999999999999. CONSTRAINT: Structured by default, freeform by exception. All layouts use container-based positioning (Section, Flex, Grid, Stack). Free-positioning is an escape hatch, not the norm. Do not introduce arbitrary coordinate-based positioning patterns.

@@ -21,4 +21,10 @@ This project is super green field and no one is using it yet. we are focused on 
 
 ## Operational Notes
 
+### Gotchas
+- TypeScript 6.0 is installed — `baseUrl` in tsconfig.json is deprecated. Use `"paths": { "@/*": ["./src/*"] }` without baseUrl.
+- Biome 2.4.8 — if you see schema version mismatch, run `bunx biome migrate --write`
+- Zod 4.3.6 — API is mostly compatible with v3. `z.lazy()` works for recursive types. `z.discriminatedUnion()` works.
+- Auto-fix lint+format: `bunx biome check . --write --unsafe`
+
 ### Codebase Patterns

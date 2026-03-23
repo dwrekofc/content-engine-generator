@@ -1,0 +1,83 @@
+{
+	"name": "Corporate Blue",
+	"brandName": "Acme Corp",
+	"version": "1.0.0",
+	"typography": {
+		"heading": {
+			"fontFamily": "Inter, sans-serif",
+			"fontSize": 36,
+			"fontWeight": 700,
+			"lineHeight": 1.2
+		},
+		"subheading": {
+			"fontFamily": "Inter, sans-serif",
+			"fontSize": 24,
+			"fontWeight": 600,
+			"lineHeight": 1.3
+		},
+		"body": {
+			"fontFamily": "Inter, sans-serif",
+			"fontSize": 16,
+			"fontWeight": 400,
+			"lineHeight": 1.6
+		},
+		"caption": {
+			"fontFamily": "Inter, sans-serif",
+			"fontSize": 12,
+			"fontWeight": 400,
+			"lineHeight": 1.4
+		},
+		"button": {
+			"fontFamily": "Inter, sans-serif",
+			"fontSize": 14,
+			"fontWeight": 600,
+			"lineHeight": 1
+		}
+	},
+	"colors": {
+		"primary": "#1a56db",
+		"secondary": "#6b7280",
+		"background": "#ffffff",
+		"text": "#111827",
+		"accent": "#f59e0b"
+	},
+	"spacing": {
+		"padding": 24,
+		"margin": 16,
+		"gap": 16
+	},
+	"button": {
+		"borderRadius": 8,
+		"paddingX": 24,
+		"paddingY": 12,
+		"fill": "#1a56db",
+		"textColor": "#ffffff"
+	},
+	"sectionOverrides": {
+		"hero": {
+			"colors": {
+				"background": "#1e3a5f",
+				"text": "#ffffff"
+			},
+			"typography": {
+				"heading": {
+					"fontFamily": "Inter, sans-serif",
+					"fontSize": 48,
+					"fontWeight": 800,
+					"lineHeight": 1.1
+				}
+			}
+		},
+		"cta": {
+			"colors": {
+				"background": "#f59e0b",
+				"text": "#111827"
+			},
+			"button": {
+				"fill": "#111827",
+				"textColor": "#ffffff",
+				"borderRadius": 24
+			}
+		}
+	}
+}
