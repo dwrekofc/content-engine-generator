@@ -167,11 +167,20 @@ function collectFromSection(section: ContentSection, paths: string[]): void {
 
 function collectFromFieldValue(value: FieldValue, paths: string[]): void {
 	if (value.type === "featured-content" && value.src) {
-		// Only collect local file paths, not URLs or data URIs
-		const src = value.src;
-		if (!src.startsWith("data:") && !src.startsWith("http://") && !src.startsWith("https://")) {
-			paths.push(src);
+		collectLocalPath(value.src, paths);
+	}
+	if (value.type === "background" && value.value) {
+		// Extract local image paths from background values like "url(/assets/bg.jpg)"
+		const urlMatch = value.value.match(/url\(["']?([^"')]+)["']?\)/);
+		if (urlMatch?.[1]) {
+			collectLocalPath(urlMatch[1], paths);
 		}
+	}
+}
+
+function collectLocalPath(src: string, paths: string[]): void {
+	if (!src.startsWith("data:") && !src.startsWith("http://") && !src.startsWith("https://")) {
+		paths.push(src);
 	}
 }
 

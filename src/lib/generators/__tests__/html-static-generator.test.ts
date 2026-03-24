@@ -604,6 +604,115 @@ describe("generateHTMLStatic — assets", () => {
 
 		expect(result.files).toEqual(["index.html"]);
 	});
+
+	test("copies local background image assets to assets/ directory", async () => {
+		const imgDir = join(tempDir, "bg-images");
+		await mkdir(imgDir, { recursive: true });
+		const bgPath = join(imgDir, "bg-pattern.png");
+		await writeFile(bgPath, "fake-bg-data");
+
+		const templateWithBg: Template = {
+			id: "bg-site",
+			name: "Background Site",
+			pages: [
+				{
+					id: "page-1",
+					sections: [
+						{
+							id: "sec-1",
+							layout: "section",
+							fields: [{ id: "bg-1", type: "background", required: true }],
+							cards: [],
+							children: [],
+						},
+					],
+				},
+			],
+		};
+
+		const contentWithBg: Content = {
+			templateRef: "bg-site",
+			themeRef: "test-theme",
+			pages: [
+				{
+					pageId: "page-1",
+					sections: [
+						{
+							sectionId: "sec-1",
+							fields: {
+								"bg-1": { type: "background", value: `url(${bgPath})` },
+							},
+							cards: [],
+							children: [],
+						},
+					],
+				},
+			],
+		};
+
+		const outDir = join(tempDir, "bg-output");
+		const result = await generateHTMLStatic(templateWithBg, minimalTheme, contentWithBg, {
+			outputDir: outDir,
+		});
+
+		expect(result.files).toContain("assets/bg-pattern.png");
+		expect(existsSync(join(outDir, "assets", "bg-pattern.png"))).toBe(true);
+	});
+
+	test("ignores background CSS colors and gradients (no asset collection)", async () => {
+		const templateWithBg: Template = {
+			id: "bg-color-site",
+			name: "BG Color Site",
+			pages: [
+				{
+					id: "page-1",
+					sections: [
+						{
+							id: "sec-1",
+							layout: "section",
+							fields: [
+								{ id: "bg-1", type: "background", required: true },
+								{ id: "bg-2", type: "background", required: true },
+							],
+							cards: [],
+							children: [],
+						},
+					],
+				},
+			],
+		};
+
+		const contentWithColors: Content = {
+			templateRef: "bg-color-site",
+			themeRef: "test-theme",
+			pages: [
+				{
+					pageId: "page-1",
+					sections: [
+						{
+							sectionId: "sec-1",
+							fields: {
+								"bg-1": { type: "background", value: "#ff0000" },
+								"bg-2": {
+									type: "background",
+									value: "linear-gradient(90deg, #000, #fff)",
+								},
+							},
+							cards: [],
+							children: [],
+						},
+					],
+				},
+			],
+		};
+
+		const outDir = join(tempDir, "bg-color-output");
+		const result = await generateHTMLStatic(templateWithBg, minimalTheme, contentWithColors, {
+			outputDir: outDir,
+		});
+
+		expect(result.files).toEqual(["index.html"]);
+	});
 });
 
 // ── Slug generation ────────────────────────────────────────────────

@@ -64,19 +64,33 @@ export {
 } from "./lib/schemas/brand-theme";
 // Content Schema
 export {
+	BackgroundValueSchema,
+	ButtonValueSchema,
 	type Content,
 	type ContentCard,
+	ContentCardSchema,
 	type ContentPage,
+	ContentPageSchema,
 	ContentSchema,
 	type ContentSection,
+	ContentSectionSchema,
+	FeaturedContentCaptionValueSchema,
+	FeaturedContentValueSchema,
 	type FieldValue,
+	FieldValueSchema,
+	ParagraphValueSchema,
+	SubtitleValueSchema,
+	TitleValueSchema,
 } from "./lib/schemas/content-schema";
 export { type ContentValidationError, validateContent } from "./lib/schemas/content-validator";
 // Template Schema
 export {
+	CanvasSizeSchema,
 	type Card,
+	CardFieldSchema,
 	type CardFieldType,
 	CardFieldTypeSchema,
+	CardSchema,
 	type Field,
 	FieldSchema,
 	type FlexConfig,
@@ -88,9 +102,13 @@ export {
 	type LayoutPrimitive,
 	LayoutPrimitiveSchema,
 	type Page,
+	PageSchema,
 	type Section,
 	type SectionFieldType,
 	SectionFieldTypeSchema,
+	SectionSchema,
+	type StackConfig,
+	StackConfigSchema,
 	type Template,
 	TemplateSchema,
 } from "./lib/schemas/template-schema";

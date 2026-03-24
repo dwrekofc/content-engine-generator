@@ -5,7 +5,7 @@
 > **Status:** Spec compliance audit complete — 8 gaps resolved. Phase 7 (Integration & Polish) complete. Phase 5-3 (HTML Static Generator) complete. Phase 5-2 (PDF Generator) complete. Phase 5-1 (PPTX Generator) complete. Phase 3 (HTML Renderer) complete. Phase 3-4 (Visual Fidelity Diff Tests) complete. Phase 4-1 (HTML Preview Dev Server) complete. Phase 4-2 (Overflow Detection) complete. Phase 2 (Layout Engine) complete — including flex wrap. Phase 1 (Schemas) complete. Phase 0 scaffolding complete. Phase 6-1 (App Shell) complete. P6-2, P6-3, P6-4 (Template Builder) complete. P6-5 (Content/Preview mode) complete. P6-6 (Generate mode) complete. P7-1, P7-2, P7-3 complete. P6-7 (Element Arrangement Tools) complete — including smart guides and layer order indicators.
 > **Precedence:** reqs-001 > specs > code. Specs conform to reqs. Code mismatches are flagged, not resolved.
 > **Last updated:** 2026-03-23
-> **Last verified:** 2026-03-23 — Full gap analysis (4th pass): 438 tests passing (32 e2e pipeline + 13 PPTX visual fidelity + 14 error handling + 10 PDF + 26 HTML static + 34 visual fidelity + 14 dev server + 17 PPTX + 59 HTML + 87 layout + 65 schemas + 10 API server + 61 arrangement tools + 15 smart guide + 13 flex wrap), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked. All source files read and compared against specs — no undocumented gaps found.
+> **Last verified:** 2026-03-23 — Full gap analysis (5th pass): 440 tests passing (32 e2e pipeline + 13 PPTX visual fidelity + 14 error handling + 10 PDF + 28 HTML static + 34 visual fidelity + 14 dev server + 17 PPTX + 59 HTML + 87 layout + 65 schemas + 10 API server + 61 arrangement tools + 15 smart guide + 13 flex wrap), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked.
 
 ### Execution Priority (recommended build order)
 
@@ -197,7 +197,7 @@ The HTML renderer is the source of truth for visual correctness. All other forma
   - ✅ All CSS inlined, local assets copied to `assets/` dir
   - ✅ No JavaScript in output, no external deps
   - ✅ Self-contained, deployable to any static host
-  - ✅ 26 tests
+  - ✅ 28 tests (includes background image asset collection)
   - Spec: `html-static-generator.md`
 
 ---
@@ -355,7 +355,7 @@ All planned items are complete. No remaining unblocked work for Phase 1.
 - **Layout engine uses fixed `DEFAULT_FIELD_HEIGHT = 40`** for all field types. Actual rendered height is content-dependent and unknown at layout time. Documented at `core.ts:11-12`.
 - **HTML renderer card field cast:** `renderCard` casts card fields `as Field` to reuse `renderField`, which handles all 7 types including `featured-content-caption`. Schema validation (`CardFieldTypeSchema`) excludes it upstream, so this is safe but not defense-in-depth. Minor.
 - **Smart guide drag interception limited by Puck API.** Puck's `usePuck()` hook only exposes `isDragging` (boolean), not drag position. Smart guides work during keyboard nudge and numeric input positioning. Full drag-time guide rendering would require Puck to expose `useDragListener` publicly — tracked as a Puck API limitation.
-- **Barrel exports expanded.** `src/index.ts` now exports all public schemas, types, and layout primitive functions. Sub-schemas (TypographyStyleSchema, FlexConfigSchema, etc.) and layout primitives (layoutFlexPrimitive, etc.) are now available to library consumers.
+- **Barrel exports fully expanded.** `src/index.ts` now exports all public schemas, types, and layout primitive functions including sub-schemas from content-schema.ts (all 7 FieldValueSchemas, ContentCardSchema, ContentSectionSchema, ContentPageSchema) and template-schema.ts (CardFieldSchema, CardSchema, SectionSchema, PageSchema, CanvasSizeSchema, StackConfig/StackConfigSchema).
 - **HTML Renderer `ce-section--block` CSS** rule added for `section` layout type. Previously the class was generated but had no CSS definition.
 - **HTML Renderer `<figcaption>` wrapped in `<figure>`** for semantic HTML correctness.
 - **Layout Engine stack z-index** now assigned to child sections in stack layout, not just fields and cards.
@@ -367,6 +367,7 @@ All planned items are complete. No remaining unblocked work for Phase 1.
 
 ## Notes
 
+- **Spec compliance audit (2026-03-23, 5th pass).** 4 additional gaps resolved: (1) HTML static generator now collects background image assets (not just featured-content), (2) barrel exports completed — all sub-schemas from content-schema.ts and template-schema.ts now exported, (3) theme and content JSON save buttons added to FilePickerBar, (4) Section schema and template builder now support `required` field for marking sections required/optional. 2 new tests added (background asset collection). Total: 440 tests passing.
 - **Spec compliance audit (2026-03-23).** 8 spec-vs-implementation gaps found and resolved: (1) `ce-section--block` CSS rule missing, (2) `<figcaption>` not in `<figure>`, (3) stack z-index for child sections, (4) PPTX card `featured-content-caption` missing, (5) PPTX spacing tokens not applied, (6) no dev server CLI entry point, (7) barrel exports incomplete, (8) overflow detection scope verified (already correct — all containers use `.ce-section` base class). Remaining Puck API limitations documented: no multi-select, no drag-time smart guides, no template reload after mount.
 - **Flex wrap implemented.** Row wrap (items wrap to next line when exceeding container width) and column wrap (items wrap to next column when exceeding container height) added to `flex.ts`. 13 new tests added covering both wrap directions, multi-line layout, gap application between wrapped lines/columns, and cross-axis alignment per line. Total: 438 tests passing.
 - **P6-7 complete.** ArrangementToolbar with precise positioning, layer order, alignment, distribution, size matching, snap-to-grid, keyboard nudge, grouping, smart guides, and layer order indicators. posX/posY/posWidth/posHeight props added to all Puck components. Wireframe updated for absolute-positioned free-position children with CSS counter layer badges ("z1", "z2"…). Bidirectional converter handles position round-trips. arrangement-utils.ts provides pure spatial utilities including `snapToGuides()` and `collectSnapTargets()`. SmartGuideOverlay renders alignment guide lines (blue edges, amber centers). 61 new tests (arrangement-tools.test.ts, +15 smart guide). Total: 429 tests passing at time of P6-7 completion. All Phase 1 items complete.

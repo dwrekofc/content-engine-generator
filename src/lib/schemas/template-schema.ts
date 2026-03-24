@@ -92,6 +92,8 @@ export interface Section {
 	id: string;
 	name?: string;
 	layout: LayoutPrimitive;
+	/** Whether this section is required when filling content */
+	required?: boolean;
 	flexConfig?: FlexConfig;
 	gridConfig?: GridConfig;
 	/** When parent layout is free-position, this child's absolute position */
@@ -106,6 +108,7 @@ export const SectionSchema: z.ZodType<Section> = z.lazy(() =>
 		id: z.string().min(1),
 		name: z.string().optional(),
 		layout: LayoutPrimitiveSchema,
+		required: z.boolean().optional(),
 		flexConfig: FlexConfigSchema.optional(),
 		gridConfig: GridConfigSchema.optional(),
 		position: FreePositionChildSchema.optional(),

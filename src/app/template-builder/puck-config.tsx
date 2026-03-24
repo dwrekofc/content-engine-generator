@@ -271,6 +271,7 @@ export const puckConfig: Config = {
 			defaultProps: {
 				name: "",
 				layout: "section",
+				required: false,
 				flexDirection: "column",
 				flexGap: 8,
 				flexAlign: "stretch",
@@ -283,6 +284,14 @@ export const puckConfig: Config = {
 			},
 			fields: {
 				name: { type: "text", label: "Section Name" },
+				required: {
+					type: "radio",
+					label: "Required",
+					options: [
+						{ label: "Yes", value: true },
+						{ label: "No", value: false },
+					],
+				},
 				layout: {
 					type: "select",
 					label: "Layout",

@@ -54,6 +54,29 @@ export function FilePickerBar({ state, updateState }: FilePickerBarProps) {
 		[updateState],
 	);
 
+	const saveFile = useCallback((data: unknown, filename: string) => {
+		const json = JSON.stringify(data, null, 2);
+		const blob = new Blob([json], { type: "application/json" });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = filename;
+		a.click();
+		URL.revokeObjectURL(url);
+	}, []);
+
+	const saveTheme = useCallback(() => {
+		if (state.theme) {
+			saveFile(state.theme, state.themePath || "theme.json");
+		}
+	}, [state.theme, state.themePath, saveFile]);
+
+	const saveContent = useCallback(() => {
+		if (state.content) {
+			saveFile(state.content, state.contentPath || "content.json");
+		}
+	}, [state.content, state.contentPath, saveFile]);
+
 	return (
 		<div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-6 flex-wrap">
 			<FilePicker
@@ -61,8 +84,36 @@ export function FilePickerBar({ state, updateState }: FilePickerBarProps) {
 				currentPath={state.templatePath}
 				onFileSelected={handleTemplate}
 			/>
-			<FilePicker label="Theme" currentPath={state.themePath} onFileSelected={handleTheme} />
-			<FilePicker label="Content" currentPath={state.contentPath} onFileSelected={handleContent} />
+			<div className="flex items-center gap-2">
+				<FilePicker label="Theme" currentPath={state.themePath} onFileSelected={handleTheme} />
+				{state.theme && (
+					<button
+						type="button"
+						onClick={saveTheme}
+						className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded border border-gray-300"
+						title="Save theme JSON"
+					>
+						Save
+					</button>
+				)}
+			</div>
+			<div className="flex items-center gap-2">
+				<FilePicker
+					label="Content"
+					currentPath={state.contentPath}
+					onFileSelected={handleContent}
+				/>
+				{state.content && (
+					<button
+						type="button"
+						onClick={saveContent}
+						className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded border border-gray-300"
+						title="Save content JSON"
+					>
+						Save
+					</button>
+				)}
+			</div>
 		</div>
 	);
 }

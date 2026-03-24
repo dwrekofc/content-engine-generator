@@ -69,6 +69,7 @@ function convertSection(section: Section): ComponentData {
 			id: section.id,
 			name: section.name || "",
 			layout: section.layout,
+			required: section.required ?? false,
 			flexDirection: section.flexConfig?.direction || "column",
 			flexGap: section.flexConfig?.gap ?? 8,
 			flexAlign: section.flexConfig?.align || "stretch",

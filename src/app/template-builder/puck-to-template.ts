@@ -113,6 +113,7 @@ function convertSection(sectionComponent: PuckComponent): Section {
 		id: (props.id as string) || generateId("section"),
 		name: (props.name as string) || undefined,
 		layout: layout as Section["layout"],
+		required: (props.required as boolean) ?? false,
 		...(position ? { position } : {}),
 		fields,
 		cards,
