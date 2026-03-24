@@ -14,6 +14,7 @@ import {
 	alignVertical,
 	bringForward,
 	bringToFront,
+	collectSnapTargets,
 	distributeHorizontal,
 	distributeVertical,
 	getBounds,
@@ -26,6 +27,7 @@ import {
 	sendToBack,
 	snapRectToGrid,
 	snapToGrid,
+	snapToGuides,
 } from "@/app/template-builder/arrangement-utils";
 
 // ── Alignment ────────────────────────────────────────────────────────
@@ -434,5 +436,158 @@ describe("position round-trip through converters", () => {
 			expect(sec.position.x).toBe(0);
 			expect(sec.position.y).toBe(0);
 		}
+	});
+});
+
+// ── Smart Guides ─────────────────────────────────────────────────────
+
+describe("collectSnapTargets", () => {
+	const siblings: Rect[] = [
+		{ x: 50, y: 100, width: 100, height: 60 },
+		{ x: 200, y: 50, width: 80, height: 40 },
+	];
+
+	test("collects left, center, right edges for x axis", () => {
+		const { xTargets } = collectSnapTargets(siblings);
+		// Sibling 1: left=50, center=100, right=150
+		// Sibling 2: left=200, center=240, right=280
+		expect(xTargets).toContain(50);
+		expect(xTargets).toContain(100);
+		expect(xTargets).toContain(150);
+		expect(xTargets).toContain(200);
+		expect(xTargets).toContain(240);
+		expect(xTargets).toContain(280);
+	});
+
+	test("collects top, center, bottom edges for y axis", () => {
+		const { yTargets } = collectSnapTargets(siblings);
+		// Sibling 1: top=100, center=130, bottom=160
+		// Sibling 2: top=50, center=70, bottom=90
+		expect(yTargets).toContain(100);
+		expect(yTargets).toContain(130);
+		expect(yTargets).toContain(160);
+		expect(yTargets).toContain(50);
+		expect(yTargets).toContain(70);
+		expect(yTargets).toContain(90);
+	});
+
+	test("returns sorted arrays", () => {
+		const { xTargets, yTargets } = collectSnapTargets(siblings);
+		for (let i = 1; i < xTargets.length; i++) {
+			expect(xTargets[i]).toBeGreaterThanOrEqual(xTargets[i - 1]);
+		}
+		for (let i = 1; i < yTargets.length; i++) {
+			expect(yTargets[i]).toBeGreaterThanOrEqual(yTargets[i - 1]);
+		}
+	});
+
+	test("deduplicates targets when edges coincide", () => {
+		const overlapping: Rect[] = [
+			{ x: 100, y: 0, width: 50, height: 50 },
+			{ x: 150, y: 0, width: 50, height: 50 }, // left edge = right edge of first
+		];
+		const { xTargets } = collectSnapTargets(overlapping);
+		// 100, 125, 150, 175, 200 — 150 appears as right of first AND left of second
+		const count150 = xTargets.filter((t) => t === 150).length;
+		expect(count150).toBe(1);
+	});
+
+	test("empty input returns empty arrays", () => {
+		const { xTargets, yTargets } = collectSnapTargets([]);
+		expect(xTargets).toEqual([]);
+		expect(yTargets).toEqual([]);
+	});
+});
+
+describe("snapToGuides", () => {
+	const siblings: Rect[] = [
+		{ x: 100, y: 100, width: 80, height: 60 },
+		{ x: 250, y: 200, width: 100, height: 50 },
+	];
+
+	test("snaps drag rect left edge to sibling left edge within threshold", () => {
+		const drag: Rect = { x: 103, y: 50, width: 60, height: 40 };
+		const result = snapToGuides(drag, siblings, 5);
+		expect(result.rect.x).toBe(100); // snapped to sibling left edge
+	});
+
+	test("snaps drag rect right edge to sibling right edge", () => {
+		// Sibling right edge = 100 + 80 = 180
+		// Drag right edge = drag.x + drag.width = x + 60 = 180 → x = 120
+		const drag: Rect = { x: 122, y: 50, width: 60, height: 40 };
+		const result = snapToGuides(drag, siblings, 5);
+		// Drag right edge should snap to 180 → x = 180 - 60 = 120
+		expect(result.rect.x).toBe(120);
+	});
+
+	test("snaps drag rect center to sibling center", () => {
+		// Sibling center x = 100 + 40 = 140
+		// Drag center = drag.x + 30 = 140 → x = 110
+		const drag: Rect = { x: 112, y: 50, width: 60, height: 40 };
+		const result = snapToGuides(drag, siblings, 5);
+		expect(result.rect.x).toBe(110);
+	});
+
+	test("does not snap when beyond threshold", () => {
+		const drag: Rect = { x: 50, y: 50, width: 60, height: 40 };
+		const result = snapToGuides(drag, siblings, 5);
+		// Nearest x target is 100 (sibling left), drag left is 50 → dist=50 > 5
+		expect(result.rect.x).toBe(50);
+		expect(result.rect.y).toBe(50);
+	});
+
+	test("returns guide lines for snapped axes", () => {
+		const drag: Rect = { x: 102, y: 101, width: 60, height: 40 };
+		const result = snapToGuides(drag, siblings, 5);
+		expect(result.guides.length).toBeGreaterThan(0);
+		expect(result.guides.some((g) => g.axis === "x")).toBe(true);
+		expect(result.guides.some((g) => g.axis === "y")).toBe(true);
+	});
+
+	test("returns no guides when not snapping", () => {
+		const drag: Rect = { x: 50, y: 50, width: 60, height: 40 };
+		const result = snapToGuides(drag, siblings, 5);
+		expect(result.guides).toEqual([]);
+	});
+
+	test("guide lines are deduplicated", () => {
+		// Place drag exactly at a sibling position — multiple edges may align
+		const drag: Rect = { x: 100, y: 100, width: 80, height: 60 };
+		const result = snapToGuides(drag, siblings, 5);
+		const keys = result.guides.map((g) => `${g.axis}:${g.position}:${g.type}`);
+		expect(keys.length).toBe(new Set(keys).size);
+	});
+
+	test("snaps y axis independently of x axis", () => {
+		// Only near y targets, far from x targets
+		const drag: Rect = { x: 500, y: 198, width: 60, height: 50 };
+		const result = snapToGuides(drag, siblings, 5);
+		expect(result.rect.x).toBe(500); // no x snap
+		expect(result.rect.y).toBe(200); // snapped to sibling 2 top=200
+	});
+
+	test("snaps to closest target when multiple are within threshold", () => {
+		// Two siblings with close edges
+		const closeSiblings: Rect[] = [
+			{ x: 100, y: 0, width: 50, height: 50 },
+			{ x: 103, y: 0, width: 50, height: 50 },
+		];
+		const drag: Rect = { x: 101, y: 0, width: 50, height: 50 };
+		const result = snapToGuides(drag, closeSiblings, 5);
+		// dist to 100 = 1, dist to 103 = 2 → snaps to 100
+		expect(result.rect.x).toBe(100);
+	});
+
+	test("custom threshold value is respected", () => {
+		// drag left=160, center=190, right=220
+		// x targets: 100, 140, 180, 250, 300, 350
+		// closest: center 190 to target 180 = dist 10
+		const drag: Rect = { x: 160, y: 300, width: 60, height: 40 };
+		// With threshold 5: dist 10 > 5 → no snap
+		const narrow = snapToGuides(drag, siblings, 5);
+		expect(narrow.rect.x).toBe(160);
+		// With threshold 15: dist 10 < 15 → snaps center to 180 → x = 180-30 = 150
+		const wide = snapToGuides(drag, siblings, 15);
+		expect(wide.rect.x).toBe(150);
 	});
 });

@@ -13,9 +13,10 @@
 
 import { usePuck } from "@measured/puck";
 import type { ComponentData, Data } from "@measured/puck";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	type AlignReference,
+	type GuideLine,
 	type HAlign,
 	type Rect,
 	type VAlign,
@@ -28,7 +29,9 @@ import {
 	matchWidth,
 	nudge,
 	snapRectToGrid,
+	snapToGuides,
 } from "./arrangement-utils";
+import { SmartGuideOverlay } from "./SmartGuideOverlay";
 
 // ── Styles ───────────────────────────────────────────────────────────
 
@@ -250,6 +253,9 @@ export function ArrangementToolbar() {
 	const [snapEnabled, setSnapEnabled] = useState(false);
 	const [gridSize, setGridSize] = useState(10);
 	const [alignRef, setAlignRef] = useState<AlignReference>("selection");
+	const [smartGuidesEnabled, setSmartGuidesEnabled] = useState(true);
+	const [activeGuides, setActiveGuides] = useState<GuideLine[]>([]);
+	const guideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const data = appState.data;
 	const selected = selectedItem;
@@ -260,6 +266,28 @@ export function ArrangementToolbar() {
 		: null;
 
 	const isFreePos = parentCtx ? isParentFreePosition(parentCtx.parent) : false;
+
+	/** Show guides briefly then clear them after a delay. */
+	const flashGuides = useCallback((guides: GuideLine[]) => {
+		setActiveGuides(guides);
+		if (guideTimerRef.current) clearTimeout(guideTimerRef.current);
+		if (guides.length > 0) {
+			guideTimerRef.current = setTimeout(() => setActiveGuides([]), 800);
+		}
+	}, []);
+
+	/** Get sibling rects excluding the selected element. */
+	const getSiblingRects = useCallback((): Rect[] => {
+		if (!parentCtx || !selected?.props?.id) return [];
+		return parentCtx.siblings
+			.filter((s) => s.props?.id !== (selected.props.id as string))
+			.map(getRect);
+	}, [parentCtx, selected]);
+
+	// Clear guides when selection changes
+	useEffect(() => {
+		setActiveGuides([]);
+	}, [selected?.props?.id]);
 
 	const setData = useCallback(
 		(newData: Data) => {
@@ -275,11 +303,25 @@ export function ArrangementToolbar() {
 			if (!selected?.props?.id) return;
 			const id = selected.props.id as string;
 			const rect = getRect(selected);
-			const newRect = { ...rect, [field]: value };
-			const snapped = snapEnabled ? snapRectToGrid(newRect, gridSize) : newRect;
-			setData(updateComponentInData(data, id, (comp) => applyRect(comp, snapped)));
+			let newRect = { ...rect, [field]: value };
+
+			if (snapEnabled) {
+				newRect = snapRectToGrid(newRect, gridSize);
+			}
+
+			// Apply smart guide snapping when enabled
+			if (smartGuidesEnabled && isFreePos) {
+				const siblingRects = getSiblingRects();
+				if (siblingRects.length > 0) {
+					const result = snapToGuides(newRect, siblingRects, 5);
+					newRect = result.rect;
+					flashGuides(result.guides);
+				}
+			}
+
+			setData(updateComponentInData(data, id, (comp) => applyRect(comp, newRect)));
 		},
-		[selected, data, snapEnabled, gridSize, setData],
+		[selected, data, snapEnabled, gridSize, smartGuidesEnabled, isFreePos, getSiblingRects, flashGuides, setData],
 	);
 
 	// ── Layer order ──────────────────────────────────────────────────
@@ -498,10 +540,21 @@ export function ArrangementToolbar() {
 			e.preventDefault();
 			const id = selected.props.id as string;
 			const rect = getRect(selected);
-			const nudged = nudge(rect, dx, dy, snapEnabled ? gridSize : undefined);
+			let nudged = nudge(rect, dx, dy, snapEnabled ? gridSize : undefined);
+
+			// Apply smart guide snapping after nudge
+			if (smartGuidesEnabled) {
+				const siblingRects = getSiblingRects();
+				if (siblingRects.length > 0) {
+					const result = snapToGuides(nudged, siblingRects, 5);
+					nudged = result.rect;
+					flashGuides(result.guides);
+				}
+			}
+
 			setData(updateComponentInData(data, id, (comp) => applyRect(comp, nudged)));
 		},
-		[selected, isFreePos, snapEnabled, gridSize, data, setData],
+		[selected, isFreePos, snapEnabled, gridSize, smartGuidesEnabled, getSiblingRects, flashGuides, data, setData],
 	);
 
 	// ── Render ───────────────────────────────────────────────────────
@@ -550,6 +603,17 @@ export function ArrangementToolbar() {
 			{parentCtx && (
 				<div style={sectionStyle}>
 					<span style={labelStyle}>Layer</span>
+					{(() => {
+						const idx = parentCtx.siblings.findIndex(
+							(s) => s.props?.id === (selected?.props?.id as string),
+						);
+						const total = parentCtx.siblings.length;
+						return idx >= 0 ? (
+							<span style={{ fontSize: 10, color: "#93c5fd", fontWeight: 600 }}>
+								{idx + 1}/{total}
+							</span>
+						) : null;
+					})()}
 					<button type="button" style={btnStyle} onClick={() => moveLayer("top")} title="Bring to Front">
 						⤒
 					</button>
@@ -651,6 +715,24 @@ export function ArrangementToolbar() {
 				)}
 			</div>
 
+			{/* Smart guides toggle */}
+			{isFreePos && (
+				<div style={sectionStyle}>
+					<span style={labelStyle}>Guides</span>
+					<button
+						type="button"
+						style={{
+							...btnStyle,
+							background: smartGuidesEnabled ? "#3b82f6" : "#334155",
+						}}
+						onClick={() => setSmartGuidesEnabled(!smartGuidesEnabled)}
+						title="Toggle smart alignment guides"
+					>
+						{smartGuidesEnabled ? "ON" : "OFF"}
+					</button>
+				</div>
+			)}
+
 			{/* Grouping */}
 			{isFreePos && (
 				<div style={{ display: "flex", gap: 4, alignItems: "center" }}>
@@ -674,6 +756,17 @@ export function ArrangementToolbar() {
 						</button>
 					)}
 				</div>
+			)}
+
+			{/* Smart guide overlay — rendered as a portal-like element at the toolbar level.
+			    The actual overlay positioning is handled by the SmartGuideOverlay component
+			    which needs to be placed inside the free-position container. */}
+			{isFreePos && activeGuides.length > 0 && parentCtx && (
+				<SmartGuideOverlay
+					guides={activeGuides}
+					containerWidth={(parentCtx.parent.props.posWidth as number) ?? 960}
+					containerHeight={(parentCtx.parent.props.posHeight as number) ?? 540}
+				/>
 			)}
 		</div>
 	);

@@ -60,6 +60,39 @@ function SlotRender({ children }: { children: ReactNode }) {
 	return <div style={{ minHeight: 24 }}>{children}</div>;
 }
 
+/**
+ * CSS for layer order badges on free-position children.
+ *
+ * Why: spec AC #4 requires layer order to be visually reflected in the wireframe.
+ * DOM order = z-order (later children paint on top). CSS counters number each
+ * direct child within a free-position container so the user can see stacking order.
+ */
+const layerBadgeCSS = `
+.ce-free-pos { counter-reset: layer-order; }
+.ce-free-pos > * { counter-increment: layer-order; }
+.ce-free-pos > *::after {
+  content: "z" counter(layer-order);
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 8px;
+  font-family: monospace;
+  font-weight: 700;
+  min-width: 18px;
+  height: 14px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  z-index: 10000;
+  pointer-events: none;
+  line-height: 1;
+}
+`;
+
 // ── Layout CSS from section config ──────────────────────────────────
 
 function getLayoutStyle(
@@ -334,6 +367,7 @@ export const puckConfig: Config = {
 									: "#64748b";
 
 				const freeStyle = getFreePositionStyle(props);
+				const isFreePos = layout === "free-position";
 
 				return (
 					<div
@@ -345,11 +379,13 @@ export const puckConfig: Config = {
 							...freeStyle,
 						}}
 					>
+						{/* Inject layer badge CSS for free-position containers */}
+						{isFreePos && <style>{layerBadgeCSS}</style>}
 						<span style={{ ...wireframeLabel, color: borderColor }}>
 							{layout.toUpperCase()}
 							{name ? `: ${name}` : ""}
 						</span>
-						<div style={layoutStyle}>
+						<div style={layoutStyle} className={isFreePos ? "ce-free-pos" : undefined}>
 							<SlotRender>{children()}</SlotRender>
 						</div>
 					</div>

@@ -2,10 +2,10 @@
 
 # Implementation Plan — Content Engine Generator
 
-> **Status:** Phase 7 (Integration & Polish) complete. Phase 5-3 (HTML Static Generator) complete. Phase 5-2 (PDF Generator) complete. Phase 5-1 (PPTX Generator) complete. Phase 3 (HTML Renderer) complete. Phase 3-4 (Visual Fidelity Diff Tests) complete. Phase 4-1 (HTML Preview Dev Server) complete. Phase 4-2 (Overflow Detection) complete. Phase 2 (Layout Engine) complete. Phase 1 (Schemas) complete. Phase 0 scaffolding complete. Phase 6-1 (App Shell) complete. P6-2, P6-3, P6-4 (Template Builder) complete. P6-5 (Content/Preview mode) complete. P6-6 (Generate mode) complete. P7-1, P7-2, P7-3 complete. P6-7 (Element Arrangement Tools) complete.
+> **Status:** Phase 7 (Integration & Polish) complete. Phase 5-3 (HTML Static Generator) complete. Phase 5-2 (PDF Generator) complete. Phase 5-1 (PPTX Generator) complete. Phase 3 (HTML Renderer) complete. Phase 3-4 (Visual Fidelity Diff Tests) complete. Phase 4-1 (HTML Preview Dev Server) complete. Phase 4-2 (Overflow Detection) complete. Phase 2 (Layout Engine) complete. Phase 1 (Schemas) complete. Phase 0 scaffolding complete. Phase 6-1 (App Shell) complete. P6-2, P6-3, P6-4 (Template Builder) complete. P6-5 (Content/Preview mode) complete. P6-6 (Generate mode) complete. P7-1, P7-2, P7-3 complete. P6-7 (Element Arrangement Tools) complete — including smart guides and layer order indicators.
 > **Precedence:** reqs-001 > specs > code. Specs conform to reqs. Code mismatches are flagged, not resolved.
 > **Last updated:** 2026-03-23
-> **Last verified:** 2026-03-23 — Full gap analysis (4th pass): 414 tests passing (32 e2e pipeline + 13 PPTX visual fidelity + 14 error handling + 10 PDF + 26 HTML static + 34 visual fidelity + 14 dev server + 17 PPTX + 59 HTML + 74 layout + 65 schemas + 10 API server + 46 arrangement tools), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked. All source files read and compared against specs — no undocumented gaps found.
+> **Last verified:** 2026-03-23 — Full gap analysis (4th pass): 429 tests passing (32 e2e pipeline + 13 PPTX visual fidelity + 14 error handling + 10 PDF + 26 HTML static + 34 visual fidelity + 14 dev server + 17 PPTX + 59 HTML + 74 layout + 65 schemas + 10 API server + 61 arrangement tools + 15 smart guide), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked. All source files read and compared against specs — no undocumented gaps found.
 
 ### Execution Priority (recommended build order)
 
@@ -250,7 +250,11 @@ The HTML renderer is the source of truth for visual correctness. All other forma
   - ✅ Wireframe rendering updated: free-position children render with absolute positioning
   - ✅ Bidirectional converter: template↔Puck position data round-trips correctly
   - ✅ arrangement-utils.ts: pure utility functions for all spatial calculations
-  - ✅ 46 new tests (arrangement-tools.test.ts): alignment, distribution, size matching, layer order, snap-to-grid, nudge, getBounds, position round-trip
+  - ✅ Smart guide computation: `snapToGuides()` and `collectSnapTargets()` — snaps to sibling edges/centers within configurable threshold, returns guide line positions
+  - ✅ SmartGuideOverlay component: renders visual alignment guide lines (blue for edges, amber for centers, dashed for center-to-center)
+  - ✅ Smart guide snapping integrated into ArrangementToolbar position updates and keyboard nudge
+  - ✅ Layer order indicators: CSS counter badges ("z1", "z2"…) on free-position children in wireframe + "Layer N/M" display in toolbar
+  - ✅ 61 new tests (arrangement-tools.test.ts): alignment, distribution, size matching, layer order, snap-to-grid, nudge, getBounds, position round-trip, smart guide snap logic (15 new)
   - Spec: `element-arrangement.md`
 
 ---
@@ -351,12 +355,13 @@ All planned items are complete. No remaining unblocked work for Phase 1.
 - **PPTX non-data-URI images** render as gray placeholder rects. Local/relative paths can't resolve at generation time — documented at `pptx-generator.ts:431`.
 - **Layout engine uses fixed `DEFAULT_FIELD_HEIGHT = 40`** for all field types. Actual rendered height is content-dependent and unknown at layout time. Documented at `core.ts:11-12`.
 - **HTML renderer card field cast:** `renderCard` casts card fields `as Field` to reuse `renderField`, which handles all 7 types including `featured-content-caption`. Schema validation (`CardFieldTypeSchema`) excludes it upstream, so this is safe but not defense-in-depth. Minor.
+- **Smart guide drag interception limited by Puck API.** Puck's `usePuck()` hook only exposes `isDragging` (boolean), not drag position. Smart guides work during keyboard nudge and numeric input positioning. Full drag-time guide rendering would require Puck to expose `useDragListener` publicly — tracked as a Puck API limitation.
 
 ---
 
 ## Notes
 
-- **P6-7 complete.** ArrangementToolbar with precise positioning, layer order, alignment, distribution, size matching, snap-to-grid, keyboard nudge, and grouping. posX/posY/posWidth/posHeight props added to all Puck components. Wireframe updated for absolute-positioned free-position children. Bidirectional converter handles position round-trips. arrangement-utils.ts provides pure spatial utilities. 46 new tests (arrangement-tools.test.ts). Total: 414 tests passing. All Phase 1 items complete.
+- **P6-7 complete.** ArrangementToolbar with precise positioning, layer order, alignment, distribution, size matching, snap-to-grid, keyboard nudge, grouping, smart guides, and layer order indicators. posX/posY/posWidth/posHeight props added to all Puck components. Wireframe updated for absolute-positioned free-position children with CSS counter layer badges ("z1", "z2"…). Bidirectional converter handles position round-trips. arrangement-utils.ts provides pure spatial utilities including `snapToGuides()` and `collectSnapTargets()`. SmartGuideOverlay renders alignment guide lines (blue edges, amber centers). 61 new tests (arrangement-tools.test.ts, +15 smart guide). Total: 429 tests passing. All Phase 1 items complete.
 - **P7-1, P7-2, P7-3 complete.** End-to-end pipeline (32 tests), PPTX visual fidelity (13 tests), and error handling (14 tests) all done. API server now returns 400 with structured errors on validation failure. ContentPreviewMode surfaces render errors and validation warnings. Total: 368 tests passing (before P6-7). Phase 7 Integration & Polish is complete.
 - **P6-5 and P6-6 complete.** Content/Preview mode has inline iframe preview with overflow detection + "Open in New Tab" button. Generate mode wired to backend API server (`src/server/api.ts`). API serves all three formats (HTML/PPTX/PDF). Vite proxies /api/* to port 3001. 10 new tests. Total: 309 tests passing.
 - **P6-2, P6-3, P6-4 complete.** Template Builder UI implemented via Puck 0.20.2. Key implementation notes: slot-based nesting (Puck's `slot` field type enables child drop zones for 3+ level nesting); `puck.css` must be imported in the entry point for Puck's UI to render correctly; Puck render functions require `any` types due to Puck's internal generic constraints — TypeScript strict mode tolerates this with targeted `// eslint-disable` comments. Template builder is UI-only, tested via `bun run build` (zero type errors, clean build). Test count remains 299.

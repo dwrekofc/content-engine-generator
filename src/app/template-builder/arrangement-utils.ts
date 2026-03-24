@@ -33,8 +33,7 @@ export function alignHorizontal(
 ): Rect[] {
 	if (rects.length === 0) return [];
 
-	const refBounds =
-		reference === "parent" && parentRect ? parentRect : getBounds(rects);
+	const refBounds = reference === "parent" && parentRect ? parentRect : getBounds(rects);
 
 	return rects.map((r) => {
 		let x: number;
@@ -62,8 +61,7 @@ export function alignVertical(
 ): Rect[] {
 	if (rects.length === 0) return [];
 
-	const refBounds =
-		reference === "parent" && parentRect ? parentRect : getBounds(rects);
+	const refBounds = reference === "parent" && parentRect ? parentRect : getBounds(rects);
 
 	return rects.map((r) => {
 		let y: number;
@@ -88,9 +86,7 @@ export function alignVertical(
 export function distributeHorizontal(rects: Rect[]): Rect[] {
 	if (rects.length < 3) return rects;
 
-	const sorted = [...rects]
-		.map((r, i) => ({ r, i }))
-		.sort((a, b) => a.r.x - b.r.x);
+	const sorted = [...rects].map((r, i) => ({ r, i })).sort((a, b) => a.r.x - b.r.x);
 
 	const first = sorted[0].r;
 	const last = sorted[sorted.length - 1].r;
@@ -113,9 +109,7 @@ export function distributeHorizontal(rects: Rect[]): Rect[] {
 export function distributeVertical(rects: Rect[]): Rect[] {
 	if (rects.length < 3) return rects;
 
-	const sorted = [...rects]
-		.map((r, i) => ({ r, i }))
-		.sort((a, b) => a.r.y - b.r.y);
+	const sorted = [...rects].map((r, i) => ({ r, i })).sort((a, b) => a.r.y - b.r.y);
 
 	const first = sorted[0].r;
 	const last = sorted[sorted.length - 1].r;
@@ -211,12 +205,7 @@ export function snapRectToGrid(rect: Rect, gridSize: number): Rect {
 // ── Nudge ────────────────────────────────────────────────────────────
 
 /** Nudge a rect by a delta. */
-export function nudge(
-	rect: Rect,
-	dx: number,
-	dy: number,
-	gridSize?: number,
-): Rect {
+export function nudge(rect: Rect, dx: number, dy: number, gridSize?: number): Rect {
 	let { x, y } = rect;
 	x += dx;
 	y += dy;
@@ -225,6 +214,157 @@ export function nudge(
 		y = snapToGrid(y, gridSize);
 	}
 	return { ...rect, x: Math.max(0, x), y: Math.max(0, y) };
+}
+
+// ── Smart Guides ─────────────────────────────────────────────────────
+
+/** A guide line indicating an alignment target during dragging. */
+export interface GuideLine {
+	/** Axis: "x" = vertical line, "y" = horizontal line. */
+	axis: "x" | "y";
+	/** Position on the axis (pixels from left/top of container). */
+	position: number;
+	/** Type of alignment: edge-to-edge, center-to-center, or edge-to-center. */
+	type: "edge" | "center";
+}
+
+/** Snap result: snapped rect + active guide lines to render. */
+export interface SnapResult {
+	rect: Rect;
+	guides: GuideLine[];
+}
+
+/**
+ * Compute snap targets from sibling rects — every edge and center.
+ * Returns sorted, deduplicated arrays of x and y positions.
+ */
+export function collectSnapTargets(siblings: Rect[]): { xTargets: number[]; yTargets: number[] } {
+	const xSet = new Set<number>();
+	const ySet = new Set<number>();
+
+	for (const r of siblings) {
+		// Left edge, center, right edge
+		xSet.add(r.x);
+		xSet.add(r.x + r.width / 2);
+		xSet.add(r.x + r.width);
+		// Top edge, center, bottom edge
+		ySet.add(r.y);
+		ySet.add(r.y + r.height / 2);
+		ySet.add(r.y + r.height);
+	}
+
+	return {
+		xTargets: [...xSet].sort((a, b) => a - b),
+		yTargets: [...ySet].sort((a, b) => a - b),
+	};
+}
+
+/**
+ * Snap a dragged rect to nearby sibling edges/centers within a threshold.
+ * Returns the snapped rect and the guide lines that should be rendered.
+ *
+ * Why: Smart guides give the user visual feedback when elements are aligned,
+ * making precise layout without manual coordinate entry possible.
+ */
+export function snapToGuides(dragRect: Rect, siblings: Rect[], threshold: number = 5): SnapResult {
+	const { xTargets, yTargets } = collectSnapTargets(siblings);
+
+	// Candidate x positions from the drag rect: left edge, center, right edge
+	const dragXEdges = [
+		{ value: dragRect.x, offset: 0, type: "edge" as const },
+		{ value: dragRect.x + dragRect.width / 2, offset: dragRect.width / 2, type: "center" as const },
+		{ value: dragRect.x + dragRect.width, offset: dragRect.width, type: "edge" as const },
+	];
+
+	// Candidate y positions from the drag rect: top, center, bottom
+	const dragYEdges = [
+		{ value: dragRect.y, offset: 0, type: "edge" as const },
+		{
+			value: dragRect.y + dragRect.height / 2,
+			offset: dragRect.height / 2,
+			type: "center" as const,
+		},
+		{ value: dragRect.y + dragRect.height, offset: dragRect.height, type: "edge" as const },
+	];
+
+	const guides: GuideLine[] = [];
+	let snappedX = dragRect.x;
+	let snappedY = dragRect.y;
+	let bestDx = threshold + 1;
+	let bestDy = threshold + 1;
+
+	// Find closest x snap
+	for (const edge of dragXEdges) {
+		for (const target of xTargets) {
+			const dist = Math.abs(edge.value - target);
+			if (dist < bestDx) {
+				bestDx = dist;
+				snappedX = target - edge.offset;
+			}
+		}
+	}
+
+	// Find closest y snap
+	for (const edge of dragYEdges) {
+		for (const target of yTargets) {
+			const dist = Math.abs(edge.value - target);
+			if (dist < bestDy) {
+				bestDy = dist;
+				snappedY = target - edge.offset;
+			}
+		}
+	}
+
+	// Apply snap only if within threshold, and collect active guide lines
+	const finalX = bestDx <= threshold ? snappedX : dragRect.x;
+	const finalY = bestDy <= threshold ? snappedY : dragRect.y;
+
+	if (bestDx <= threshold) {
+		// Find which target(s) we snapped to and add guide lines
+		const snappedRect = { ...dragRect, x: finalX };
+		const snappedXEdges = [
+			snappedRect.x,
+			snappedRect.x + snappedRect.width / 2,
+			snappedRect.x + snappedRect.width,
+		];
+		for (const target of xTargets) {
+			for (let i = 0; i < snappedXEdges.length; i++) {
+				if (Math.abs(snappedXEdges[i] - target) < 0.5) {
+					guides.push({ axis: "x", position: target, type: i === 1 ? "center" : "edge" });
+				}
+			}
+		}
+	}
+
+	if (bestDy <= threshold) {
+		const snappedRect = { ...dragRect, y: finalY };
+		const snappedYEdges = [
+			snappedRect.y,
+			snappedRect.y + snappedRect.height / 2,
+			snappedRect.y + snappedRect.height,
+		];
+		for (const target of yTargets) {
+			for (let i = 0; i < snappedYEdges.length; i++) {
+				if (Math.abs(snappedYEdges[i] - target) < 0.5) {
+					guides.push({ axis: "y", position: target, type: i === 1 ? "center" : "edge" });
+				}
+			}
+		}
+	}
+
+	// Deduplicate guides
+	const seen = new Set<string>();
+	const uniqueGuides = guides.filter((g) => {
+		const key = `${g.axis}:${g.position}:${g.type}`;
+		if (seen.has(key)) return false;
+		seen.add(key);
+		return true;
+	});
+
+	return {
+		rect: { ...dragRect, x: finalX, y: finalY },
+		guides: uniqueGuides,
+	};
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────
