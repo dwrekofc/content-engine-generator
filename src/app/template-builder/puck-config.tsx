@@ -108,20 +108,56 @@ function getLayoutStyle(
 
 // ── Puck Config ─────────────────────────────────────────────────────
 
+// ── Free-position absolute style helper ─────────────────────────────
+
+function getFreePositionStyle(props: any): CSSProperties | undefined {
+	if (props.posX != null && props.posY != null && props.posWidth && props.posHeight) {
+		return {
+			position: "absolute",
+			left: props.posX,
+			top: props.posY,
+			width: props.posWidth,
+			height: props.posHeight,
+		};
+	}
+	return undefined;
+}
+
 // Helper to make a field component render function
 function makeFieldRender(typeName: string, color: string) {
-	return (props: any) => (
-		<div
-			style={
-				typeName === "FEATURED CONTENT" ? { ...fieldBox(color), minHeight: 60 } : fieldBox(color)
-			}
-		>
-			<span style={{ ...fieldLabel, color }}>{typeName}</span>
-			{props.required && <span style={{ color: "#ef4444", fontSize: 10 }}>*</span>}
-			{props.fieldId && <span style={{ fontSize: 9, color: "#94a3b8" }}>({props.fieldId})</span>}
-		</div>
-	);
+	return (props: any) => {
+		const freeStyle = getFreePositionStyle(props);
+		return (
+			<div
+				style={{
+					...(typeName === "FEATURED CONTENT"
+						? { ...fieldBox(color), minHeight: 60 }
+						: fieldBox(color)),
+					...freeStyle,
+				}}
+			>
+				<span style={{ ...fieldLabel, color }}>{typeName}</span>
+				{props.required && <span style={{ color: "#ef4444", fontSize: 10 }}>*</span>}
+				{props.fieldId && (
+					<span style={{ fontSize: 9, color: "#94a3b8" }}>({props.fieldId})</span>
+				)}
+			</div>
+		);
+	};
 }
+
+// ── Free-position coordinate fields ─────────────────────────────────
+// These appear on all droppable components. Only meaningful when the
+// component sits inside a free-position container.
+
+const positionFields = {
+	posX: { type: "number" as const, label: "X Position", min: 0 },
+	posY: { type: "number" as const, label: "Y Position", min: 0 },
+	posWidth: { type: "number" as const, label: "Width", min: 1 },
+	posHeight: { type: "number" as const, label: "Height", min: 1 },
+};
+
+const positionDefaults = { posX: 0, posY: 0, posWidth: 200, posHeight: 60 };
 
 // Standard field config (shared by all 7 field types)
 const fieldFields = {
@@ -135,6 +171,7 @@ const fieldFields = {
 		],
 	},
 	label: { type: "text" as const, label: "Label" },
+	...positionFields,
 };
 
 export const puckConfig: Config = {
@@ -209,6 +246,9 @@ export const puckConfig: Config = {
 				gridColumns: 2,
 				gridRows: 1,
 				gridGap: 8,
+				...positionDefaults,
+				posWidth: 300,
+				posHeight: 200,
 			},
 			fields: {
 				name: { type: "text", label: "Section Name" },
@@ -245,6 +285,7 @@ export const puckConfig: Config = {
 				gridColumns: { type: "number", label: "Grid Columns", min: 1, max: 12 },
 				gridRows: { type: "number", label: "Grid Rows", min: 1, max: 12 },
 				gridGap: { type: "number", label: "Grid Gap", min: 0 },
+				...positionFields,
 				children: {
 					type: "slot",
 					allow: [
@@ -292,6 +333,8 @@ export const puckConfig: Config = {
 									? "#ef4444"
 									: "#64748b";
 
+				const freeStyle = getFreePositionStyle(props);
+
 				return (
 					<div
 						style={{
@@ -299,6 +342,7 @@ export const puckConfig: Config = {
 							borderColor,
 							marginBottom: 8,
 							paddingTop: 20,
+							...freeStyle,
 						}}
 					>
 						<span style={{ ...wireframeLabel, color: borderColor }}>
@@ -316,9 +360,10 @@ export const puckConfig: Config = {
 		// ── Card ────────────────────────────────────────────────────────
 		Card: {
 			label: "Card",
-			defaultProps: { name: "" },
+			defaultProps: { name: "", ...positionDefaults, posWidth: 200, posHeight: 120 },
 			fields: {
 				name: { type: "text", label: "Card Name" },
+				...positionFields,
 				children: {
 					type: "slot",
 					allow: [
@@ -332,66 +377,70 @@ export const puckConfig: Config = {
 					// No FeaturedContentCaptionField in cards per spec
 				},
 			},
-			render: (props: any) => (
-				<div
-					style={{
-						...wireframeBox,
-						borderColor: "#06b6d4",
-						borderStyle: "solid",
-						paddingTop: 20,
-					}}
-				>
-					<span style={{ ...wireframeLabel, color: "#06b6d4" }}>
-						CARD{props.name ? `: ${props.name}` : ""}
-					</span>
-					<div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-						<SlotRender>{props.children()}</SlotRender>
+			render: (props: any) => {
+				const freeStyle = getFreePositionStyle(props);
+				return (
+					<div
+						style={{
+							...wireframeBox,
+							borderColor: "#06b6d4",
+							borderStyle: "solid",
+							paddingTop: 20,
+							...freeStyle,
+						}}
+					>
+						<span style={{ ...wireframeLabel, color: "#06b6d4" }}>
+							CARD{props.name ? `: ${props.name}` : ""}
+						</span>
+						<div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+							<SlotRender>{props.children()}</SlotRender>
+						</div>
 					</div>
-				</div>
-			),
+				);
+			},
 		},
 
 		// ── Field Components ────────────────────────────────────────────
 
 		TitleField: {
 			label: "Title",
-			defaultProps: { fieldId: "", required: true, label: "" },
+			defaultProps: { fieldId: "", required: true, label: "", ...positionDefaults },
 			fields: fieldFields,
 			render: makeFieldRender("TITLE", "#3b82f6"),
 		},
 		SubtitleField: {
 			label: "Subtitle",
-			defaultProps: { fieldId: "", required: false, label: "" },
+			defaultProps: { fieldId: "", required: false, label: "", ...positionDefaults },
 			fields: fieldFields,
 			render: makeFieldRender("SUBTITLE", "#6366f1"),
 		},
 		ParagraphField: {
 			label: "Paragraph",
-			defaultProps: { fieldId: "", required: false, label: "" },
+			defaultProps: { fieldId: "", required: false, label: "", ...positionDefaults },
 			fields: fieldFields,
 			render: makeFieldRender("PARAGRAPH", "#64748b"),
 		},
 		ButtonField: {
 			label: "Button",
-			defaultProps: { fieldId: "", required: false, label: "" },
+			defaultProps: { fieldId: "", required: false, label: "", ...positionDefaults },
 			fields: fieldFields,
 			render: makeFieldRender("BUTTON", "#10b981"),
 		},
 		FeaturedContentField: {
 			label: "Featured Content",
-			defaultProps: { fieldId: "", required: false, label: "" },
+			defaultProps: { fieldId: "", required: false, label: "", ...positionDefaults, posHeight: 80 },
 			fields: fieldFields,
 			render: makeFieldRender("FEATURED CONTENT", "#f59e0b"),
 		},
 		FeaturedContentCaptionField: {
 			label: "Caption",
-			defaultProps: { fieldId: "", required: false, label: "" },
+			defaultProps: { fieldId: "", required: false, label: "", ...positionDefaults },
 			fields: fieldFields,
 			render: makeFieldRender("CAPTION", "#a855f7"),
 		},
 		BackgroundField: {
 			label: "Background",
-			defaultProps: { fieldId: "", required: false, label: "" },
+			defaultProps: { fieldId: "", required: false, label: "", ...positionDefaults },
 			fields: fieldFields,
 			render: makeFieldRender("BACKGROUND", "#78716c"),
 		},

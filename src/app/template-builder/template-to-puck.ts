@@ -75,6 +75,10 @@ function convertSection(section: Section): ComponentData {
 			gridColumns: section.gridConfig?.columns || 2,
 			gridRows: section.gridConfig?.rows || 1,
 			gridGap: section.gridConfig?.gap ?? 8,
+			posX: section.position?.x ?? 0,
+			posY: section.position?.y ?? 0,
+			posWidth: section.position?.width ?? 300,
+			posHeight: section.position?.height ?? 200,
 			children,
 		},
 	};
@@ -88,6 +92,10 @@ function convertCard(card: Card): ComponentData {
 		props: {
 			id: card.id,
 			name: "",
+			posX: 0,
+			posY: 0,
+			posWidth: 200,
+			posHeight: 120,
 			children,
 		},
 	};
@@ -106,6 +114,10 @@ function convertField(field: Field): ComponentData {
 			fieldId: field.id,
 			required: field.required ?? false,
 			label: field.label || "",
+			posX: 0,
+			posY: 0,
+			posWidth: 200,
+			posHeight: 60,
 		},
 	};
 }

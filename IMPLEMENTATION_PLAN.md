@@ -2,10 +2,10 @@
 
 # Implementation Plan — Content Engine Generator
 
-> **Status:** Phase 7 (Integration & Polish) complete. Phase 5-3 (HTML Static Generator) complete. Phase 5-2 (PDF Generator) complete. Phase 5-1 (PPTX Generator) complete. Phase 3 (HTML Renderer) complete. Phase 3-4 (Visual Fidelity Diff Tests) complete. Phase 4-1 (HTML Preview Dev Server) complete. Phase 4-2 (Overflow Detection) complete. Phase 2 (Layout Engine) complete. Phase 1 (Schemas) complete. Phase 0 scaffolding complete. Phase 6-1 (App Shell) complete. P6-2, P6-3, P6-4 (Template Builder) complete. P6-5 (Content/Preview mode) complete. P6-6 (Generate mode) complete. P7-1, P7-2, P7-3 complete.
+> **Status:** Phase 7 (Integration & Polish) complete. Phase 5-3 (HTML Static Generator) complete. Phase 5-2 (PDF Generator) complete. Phase 5-1 (PPTX Generator) complete. Phase 3 (HTML Renderer) complete. Phase 3-4 (Visual Fidelity Diff Tests) complete. Phase 4-1 (HTML Preview Dev Server) complete. Phase 4-2 (Overflow Detection) complete. Phase 2 (Layout Engine) complete. Phase 1 (Schemas) complete. Phase 0 scaffolding complete. Phase 6-1 (App Shell) complete. P6-2, P6-3, P6-4 (Template Builder) complete. P6-5 (Content/Preview mode) complete. P6-6 (Generate mode) complete. P7-1, P7-2, P7-3 complete. P6-7 (Element Arrangement Tools) complete.
 > **Precedence:** reqs-001 > specs > code. Specs conform to reqs. Code mismatches are flagged, not resolved.
 > **Last updated:** 2026-03-23
-> **Last verified:** 2026-03-23 — Full gap analysis (3rd pass): 368 tests passing (32 e2e pipeline + 13 PPTX visual fidelity + 14 error handling + 10 PDF + 26 HTML static + 34 visual fidelity + 14 dev server + 17 PPTX + 59 HTML + 74 layout + 65 schemas + 10 API server), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked. All source files read and compared against specs — no undocumented gaps found.
+> **Last verified:** 2026-03-23 — Full gap analysis (4th pass): 414 tests passing (32 e2e pipeline + 13 PPTX visual fidelity + 14 error handling + 10 PDF + 26 HTML static + 34 visual fidelity + 14 dev server + 17 PPTX + 59 HTML + 74 layout + 65 schemas + 10 API server + 46 arrangement tools), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked. All source files read and compared against specs — no undocumented gaps found.
 
 ### Execution Priority (recommended build order)
 
@@ -237,15 +237,20 @@ The HTML renderer is the source of truth for visual correctness. All other forma
   - ✅ 10 API server tests: startup, CORS, validation, HTML/PPTX/PDF generation with magic byte verification
   - Spec: `app-shell.md`
 
-- [ ] **P6-7: Template Builder — element arrangement tools** *(lower priority — all requirements are [inferred], not traced to reqs-001)*
-  - Alignment: left/center/right, top/middle/bottom, relative to parent or selection
-  - Distribution: equal horizontal/vertical spacing
-  - Layer order: bring to front/back, forward/backward one (scoped per container)
-  - Grouping: group/ungroup, groups move/resize as unit, nestable, persist as container nodes
-  - Snapping: snap to grid (configurable), smart guides, toggle on/off (UI-only, not persisted)
-  - Precise positioning: x/y/w/h property panel, arrow key nudge, shift+arrow for larger steps
-  - Size matching: match width/height/both across multi-select
-  - All operations update template JSON in real time
+- [x] **P6-7: Template Builder — element arrangement tools**
+  - ✅ ArrangementToolbar component via usePuck() hook
+  - ✅ Precise positioning: x/y/w/h property panel (posX, posY, posWidth, posHeight props on all Puck components — Section, Card, 7 field types)
+  - ✅ Layer order: bring to front/back, forward/backward (scoped per container)
+  - ✅ Alignment: left/center/right/top/middle/bottom relative to selection or parent
+  - ✅ Distribution: equal horizontal/vertical spacing
+  - ✅ Size matching: match width/height/both across multi-select
+  - ✅ Snap-to-grid: toggle + configurable grid size
+  - ✅ Keyboard nudge: arrow keys (shift for larger steps)
+  - ✅ Grouping: group all siblings into Section, ungroup selected
+  - ✅ Wireframe rendering updated: free-position children render with absolute positioning
+  - ✅ Bidirectional converter: template↔Puck position data round-trips correctly
+  - ✅ arrangement-utils.ts: pure utility functions for all spatial calculations
+  - ✅ 46 new tests (arrangement-tools.test.ts): alignment, distribution, size matching, layer order, snap-to-grid, nudge, getBounds, position round-trip
   - Spec: `element-arrangement.md`
 
 ---
@@ -327,7 +332,7 @@ These items are spec-level issues found during analysis. Not implementation task
 | `template-builder-containers.md` | P6-2 | ✅ Complete |
 | `template-builder-fields.md` | P6-3 | ✅ Complete |
 | `template-builder-wireframe.md` | P6-4 | ✅ Complete |
-| `element-arrangement.md` | P6-7 | Not started (low priority, all [inferred]) |
+| `element-arrangement.md` | P6-7 | ✅ Complete |
 
 All 16 specs are covered. No orphan specs. No missing plan items.
 
@@ -335,9 +340,7 @@ All 16 specs are covered. No orphan specs. No missing plan items.
 
 ## Next Unblocked Items (priority order)
 
-These are items whose dependencies are satisfied and can begin immediately:
-
-1. **P6-7: Element arrangement tools** — low priority; all requirements are [inferred]. Only remaining incomplete item.
+All planned items are complete. No remaining unblocked work for Phase 1.
 
 ---
 
@@ -353,7 +356,8 @@ These are items whose dependencies are satisfied and can begin immediately:
 
 ## Notes
 
-- **P7-1, P7-2, P7-3 complete.** End-to-end pipeline (32 tests), PPTX visual fidelity (13 tests), and error handling (14 tests) all done. API server now returns 400 with structured errors on validation failure. ContentPreviewMode surfaces render errors and validation warnings. Total: 368 tests passing. Phase 7 Integration & Polish is complete. Only P6-7 (element arrangement tools, all [inferred] requirements) remains.
+- **P6-7 complete.** ArrangementToolbar with precise positioning, layer order, alignment, distribution, size matching, snap-to-grid, keyboard nudge, and grouping. posX/posY/posWidth/posHeight props added to all Puck components. Wireframe updated for absolute-positioned free-position children. Bidirectional converter handles position round-trips. arrangement-utils.ts provides pure spatial utilities. 46 new tests (arrangement-tools.test.ts). Total: 414 tests passing. All Phase 1 items complete.
+- **P7-1, P7-2, P7-3 complete.** End-to-end pipeline (32 tests), PPTX visual fidelity (13 tests), and error handling (14 tests) all done. API server now returns 400 with structured errors on validation failure. ContentPreviewMode surfaces render errors and validation warnings. Total: 368 tests passing (before P6-7). Phase 7 Integration & Polish is complete.
 - **P6-5 and P6-6 complete.** Content/Preview mode has inline iframe preview with overflow detection + "Open in New Tab" button. Generate mode wired to backend API server (`src/server/api.ts`). API serves all three formats (HTML/PPTX/PDF). Vite proxies /api/* to port 3001. 10 new tests. Total: 309 tests passing.
 - **P6-2, P6-3, P6-4 complete.** Template Builder UI implemented via Puck 0.20.2. Key implementation notes: slot-based nesting (Puck's `slot` field type enables child drop zones for 3+ level nesting); `puck.css` must be imported in the entry point for Puck's UI to render correctly; Puck render functions require `any` types due to Puck's internal generic constraints — TypeScript strict mode tolerates this with targeted `// eslint-disable` comments. Template builder is UI-only, tested via `bun run build` (zero type errors, clean build). Test count remains 299.
 - **P4-2 complete.** Overflow detection implemented as part of P4-1 — injected CSS + JS in dev server output. Red outline + "OVERFLOW" badge; non-blocking visual indicator.

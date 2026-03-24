@@ -10,6 +10,7 @@ import "@measured/puck/puck.css";
 import type { Data } from "@measured/puck";
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { Template } from "@/lib/schemas/template-schema";
+import { ArrangementToolbar } from "./ArrangementToolbar";
 import { puckConfig } from "./puck-config";
 import { puckDataToTemplate } from "./puck-to-template";
 import { templateToPuckData } from "./template-to-puck";
@@ -92,7 +93,9 @@ export function PuckEditor({ template, onTemplateChange }: PuckEditorProps) {
 						</button>
 					</div>
 				)}
-			/>
+			>
+				<ArrangementToolbar />
+			</Puck>
 
 			{showJSON && currentTemplate && (
 				<div

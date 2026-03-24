@@ -11,6 +11,7 @@ import type {
 	Card,
 	CardFieldType,
 	Field,
+	FreePositionChild,
 	Page,
 	Section,
 	Template,
@@ -30,6 +31,18 @@ const FIELD_COMPONENT_MAP: Record<string, string> = {
 interface PuckComponent {
 	type: string;
 	props: Record<string, unknown>;
+}
+
+/** Extract free-position coordinates from Puck props when all four are set */
+function extractPosition(props: Record<string, unknown>): FreePositionChild | undefined {
+	const x = props.posX as number | undefined;
+	const y = props.posY as number | undefined;
+	const w = props.posWidth as number | undefined;
+	const h = props.posHeight as number | undefined;
+	if (x != null && y != null && w != null && w > 0 && h != null && h > 0) {
+		return { x, y, width: w, height: h };
+	}
+	return undefined;
 }
 
 /**
@@ -95,10 +108,12 @@ function convertSection(sectionComponent: PuckComponent): Section {
 		}
 	}
 
+	const position = extractPosition(props);
 	const section: Section = {
 		id: (props.id as string) || generateId("section"),
 		name: (props.name as string) || undefined,
 		layout: layout as Section["layout"],
+		...(position ? { position } : {}),
 		fields,
 		cards,
 		children,
