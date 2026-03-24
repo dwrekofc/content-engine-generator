@@ -2,10 +2,10 @@
 
 # Implementation Plan — Content Engine Generator
 
-> **Status:** Phase 5-3 (HTML Static Generator) complete. Phase 5-2 (PDF Generator) complete. Phase 5-1 (PPTX Generator) complete. Phase 3 (HTML Renderer) complete. Phase 3-4 (Visual Fidelity Diff Tests) complete. Phase 4-1 (HTML Preview Dev Server) complete. Phase 4-2 (Overflow Detection) complete. Phase 2 (Layout Engine) complete. Phase 1 (Schemas) complete. Phase 0 scaffolding complete. Phase 6-1 (App Shell) complete. P6-2, P6-3, P6-4 (Template Builder) complete. P6-5 (Content/Preview mode) complete. P6-6 (Generate mode) complete.
+> **Status:** Phase 7 (Integration & Polish) complete. Phase 5-3 (HTML Static Generator) complete. Phase 5-2 (PDF Generator) complete. Phase 5-1 (PPTX Generator) complete. Phase 3 (HTML Renderer) complete. Phase 3-4 (Visual Fidelity Diff Tests) complete. Phase 4-1 (HTML Preview Dev Server) complete. Phase 4-2 (Overflow Detection) complete. Phase 2 (Layout Engine) complete. Phase 1 (Schemas) complete. Phase 0 scaffolding complete. Phase 6-1 (App Shell) complete. P6-2, P6-3, P6-4 (Template Builder) complete. P6-5 (Content/Preview mode) complete. P6-6 (Generate mode) complete. P7-1, P7-2, P7-3 complete.
 > **Precedence:** reqs-001 > specs > code. Specs conform to reqs. Code mismatches are flagged, not resolved.
 > **Last updated:** 2026-03-23
-> **Last verified:** 2026-03-23 — Full gap analysis (2nd pass): 309 tests passing (10 PDF + 26 HTML static + 34 visual fidelity + 14 dev server + 17 PPTX + 59 HTML + 74 layout + 65 schemas + 10 API server), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked. All source files read and compared against specs — no undocumented gaps found.
+> **Last verified:** 2026-03-23 — Full gap analysis (3rd pass): 368 tests passing (32 e2e pipeline + 13 PPTX visual fidelity + 14 error handling + 10 PDF + 26 HTML static + 34 visual fidelity + 14 dev server + 17 PPTX + 59 HTML + 74 layout + 65 schemas + 10 API server), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked. All source files read and compared against specs — no undocumented gaps found.
 
 ### Execution Priority (recommended build order)
 
@@ -252,19 +252,18 @@ The HTML renderer is the source of truth for visual correctness. All other forma
 
 ## Phase 7: Integration & Polish
 
-- [ ] **P7-1: End-to-end pipeline test**
-  - Load sample template + theme + content → render HTML preview → generate PPTX, PDF, HTML static site
-  - Verify all outputs are valid and visually correct
-  - Cross-check specs conformance against design-principles.md constraints
+- [x] **P7-1: End-to-end pipeline test** `src/__tests__/e2e-pipeline.test.ts`
+  - ✅ 32 tests: loads sample fixtures → validates schemas → renders HTML → computes layout → generates PPTX, PDF, HTML static → verifies all outputs valid
+  - ✅ Coverage: schema validation (4), theme processing (2), layout engine (4), HTML renderer (5), PPTX generator (4), PDF generator (4), HTML static site (4), cross-format consistency (3)
 
-- [ ] **P7-2: Visual fidelity verification**
-  - Compare PPTX output against HTML reference for sample templates
-  - Ensure layout engine positions match CSS-rendered positions within tolerance
+- [x] **P7-2: Visual fidelity verification** `src/__tests__/pptx-visual-fidelity.test.ts`
+  - ✅ 13 tests: PPTX scaling math (canvas px → inches), layout engine coverage for PPTX canvas, HTML↔Layout↔PPTX element ID chain, PPTX output structural validity
+  - ✅ Combined with existing P3-4 (34 tests) forms full chain: HTML ↔ Layout Engine ↔ PPTX
 
-- [ ] **P7-3: Error handling and user feedback**
-  - Schema validation errors surfaced in UI
-  - Generation errors with clear messages
-  - File I/O error handling
+- [x] **P7-3: Error handling and user feedback** `src/__tests__/error-handling.test.ts`
+  - ✅ 14 tests: schema validation (5), content-template mismatch (4), HTML renderer robustness (2), API routing (3)
+  - ✅ API server: Zod validation errors return 400 (not 500) with structured error messages; content-against-template validation added
+  - ✅ ContentPreviewMode: render errors displayed (not silently swallowed); content validation warnings shown in amber banner
 
 ---
 
@@ -338,8 +337,7 @@ All 16 specs are covered. No orphan specs. No missing plan items.
 
 These are items whose dependencies are satisfied and can begin immediately:
 
-1. **P6-7: Element arrangement tools** — low priority; all requirements are [inferred].
-2. **P7: Integration & Polish** — end-to-end pipeline test, visual fidelity verification, error handling.
+1. **P6-7: Element arrangement tools** — low priority; all requirements are [inferred]. Only remaining incomplete item.
 
 ---
 
@@ -355,6 +353,7 @@ These are items whose dependencies are satisfied and can begin immediately:
 
 ## Notes
 
+- **P7-1, P7-2, P7-3 complete.** End-to-end pipeline (32 tests), PPTX visual fidelity (13 tests), and error handling (14 tests) all done. API server now returns 400 with structured errors on validation failure. ContentPreviewMode surfaces render errors and validation warnings. Total: 368 tests passing. Phase 7 Integration & Polish is complete. Only P6-7 (element arrangement tools, all [inferred] requirements) remains.
 - **P6-5 and P6-6 complete.** Content/Preview mode has inline iframe preview with overflow detection + "Open in New Tab" button. Generate mode wired to backend API server (`src/server/api.ts`). API serves all three formats (HTML/PPTX/PDF). Vite proxies /api/* to port 3001. 10 new tests. Total: 309 tests passing.
 - **P6-2, P6-3, P6-4 complete.** Template Builder UI implemented via Puck 0.20.2. Key implementation notes: slot-based nesting (Puck's `slot` field type enables child drop zones for 3+ level nesting); `puck.css` must be imported in the entry point for Puck's UI to render correctly; Puck render functions require `any` types due to Puck's internal generic constraints — TypeScript strict mode tolerates this with targeted `// eslint-disable` comments. Template builder is UI-only, tested via `bun run build` (zero type errors, clean build). Test count remains 299.
 - **P4-2 complete.** Overflow detection implemented as part of P4-1 — injected CSS + JS in dev server output. Red outline + "OVERFLOW" badge; non-blocking visual indicator.

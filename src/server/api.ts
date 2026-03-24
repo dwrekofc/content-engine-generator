@@ -1,9 +1,11 @@
+import { ZodError } from "zod";
 import { generatePDF } from "../lib/generators/pdf-generator";
 import { generatePPTX } from "../lib/generators/pptx-generator";
 import { renderHTML } from "../lib/renderers/html-renderer";
-import { BrandThemeSchema } from "../lib/schemas/brand-theme";
-import { ContentSchema } from "../lib/schemas/content-schema";
-import { TemplateSchema } from "../lib/schemas/template-schema";
+import { type BrandTheme, BrandThemeSchema } from "../lib/schemas/brand-theme";
+import { type Content, ContentSchema } from "../lib/schemas/content-schema";
+import { validateContent } from "../lib/schemas/content-validator";
+import { type Template, TemplateSchema } from "../lib/schemas/template-schema";
 
 // ── Constants ──────────────────────────────────────────────────────
 
@@ -61,10 +63,41 @@ async function handleGenerate(req: Request): Promise<Response> {
 		return jsonError(`Unknown format: ${format}. Expected: html-static, pptx, pdf`, 400);
 	}
 
-	// Validate inputs against schemas
-	const parsedTemplate = TemplateSchema.parse(template);
-	const parsedTheme = BrandThemeSchema.parse(theme);
-	const parsedContent = ContentSchema.parse(content);
+	// Validate inputs against schemas — Zod errors are caught and returned as 400
+	let parsedTemplate: Template;
+	let parsedTheme: BrandTheme;
+	let parsedContent: Content;
+	try {
+		parsedTemplate = TemplateSchema.parse(template);
+	} catch (err) {
+		if (err instanceof ZodError) {
+			return jsonError(`Template validation failed: ${formatZodError(err)}`, 400);
+		}
+		throw err;
+	}
+	try {
+		parsedTheme = BrandThemeSchema.parse(theme);
+	} catch (err) {
+		if (err instanceof ZodError) {
+			return jsonError(`Theme validation failed: ${formatZodError(err)}`, 400);
+		}
+		throw err;
+	}
+	try {
+		parsedContent = ContentSchema.parse(content);
+	} catch (err) {
+		if (err instanceof ZodError) {
+			return jsonError(`Content validation failed: ${formatZodError(err)}`, 400);
+		}
+		throw err;
+	}
+
+	// Validate content against template structure
+	const contentErrors = validateContent(parsedContent, parsedTemplate);
+	if (contentErrors.length > 0) {
+		const details = contentErrors.map((e) => `${e.path}: ${e.message}`).join("; ");
+		return jsonError(`Content does not match template: ${details}`, 400);
+	}
 
 	const ext = FILE_EXTENSIONS[format];
 
@@ -108,6 +141,17 @@ function handleHealthCheck(): Response {
 }
 
 // ── Helpers ────────────────────────────────────────────────────────
+
+/** Formats a ZodError into a human-readable string with field paths */
+function formatZodError(err: ZodError): string {
+	return err.issues
+		.map((issue) => {
+			const path = issue.path.length > 0 ? issue.path.join(".") : "(root)";
+			return `${path}: ${issue.message}`;
+		})
+		.slice(0, 5) // Limit to first 5 issues to avoid huge error messages
+		.join("; ");
+}
 
 function jsonError(message: string, status: number): Response {
 	return new Response(JSON.stringify({ error: message }), {

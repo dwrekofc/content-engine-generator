@@ -158,9 +158,9 @@ describe("API server — validation", () => {
 				content: minimalContent,
 			}),
 		});
-		expect(res.status).toBe(500);
+		expect(res.status).toBe(400);
 		const body = await res.json();
-		expect(body.error).toBeTruthy();
+		expect(body.error).toContain("Template validation failed");
 	});
 
 	test("returns 404 for unknown routes", async () => {

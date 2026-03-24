@@ -1,5 +1,6 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { renderHTML } from "@/lib/renderers/html-renderer";
+import { validateContent } from "@/lib/schemas/content-validator";
 import type { AppState } from "../App";
 import { FilePickerBar } from "../components/FilePickerBar";
 
@@ -66,12 +67,24 @@ function injectOverflowDetection(html: string): string {
 export function ContentPreviewMode({ state, updateState }: ContentPreviewModeProps) {
 	const { template, theme, content } = state;
 
+	const [renderError, setRenderError] = useState<string | null>(null);
+
+	const validationWarnings = useMemo(() => {
+		if (!template || !content) return [];
+		return validateContent(content, template);
+	}, [template, content]);
+
 	const previewHTML = useMemo(() => {
-		if (!template || !theme || !content) return null;
+		if (!template || !theme || !content) {
+			setRenderError(null);
+			return null;
+		}
 		try {
 			const html = renderHTML(template, theme, content);
+			setRenderError(null);
 			return injectOverflowDetection(html);
-		} catch {
+		} catch (err) {
+			setRenderError(err instanceof Error ? err.message : String(err));
 			return null;
 		}
 	}, [template, theme, content]);
@@ -92,6 +105,23 @@ export function ContentPreviewMode({ state, updateState }: ContentPreviewModePro
 			{previewHTML ? (
 				<div className="flex-1 bg-gray-100 p-4 overflow-auto">
 					<div className="mx-auto" style={{ maxWidth: 1320 }}>
+						{validationWarnings.length > 0 && (
+							<div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+								<p className="text-sm font-medium text-amber-800 mb-1">
+									Content validation warnings ({validationWarnings.length}):
+								</p>
+								<ul className="text-xs text-amber-700 space-y-0.5">
+									{validationWarnings.slice(0, 5).map((w) => (
+										<li key={w.path}>
+											<code className="font-mono">{w.path}</code>: {w.message}
+										</li>
+									))}
+									{validationWarnings.length > 5 && (
+										<li className="italic">...and {validationWarnings.length - 5} more</li>
+									)}
+								</ul>
+							</div>
+						)}
 						<div className="flex justify-end mb-2">
 							<button
 								type="button"
@@ -111,14 +141,25 @@ export function ContentPreviewMode({ state, updateState }: ContentPreviewModePro
 				</div>
 			) : (
 				<div className="flex-1 flex items-center justify-center text-gray-500">
-					<div className="text-center">
-						<p className="text-lg mb-2">No preview available</p>
-						<p className="text-sm">
-							Select a template, theme, and content JSON file to see the preview.
-						</p>
-						{!template && <p className="text-sm text-amber-600 mt-2">Missing: template</p>}
-						{!theme && <p className="text-sm text-amber-600 mt-2">Missing: theme</p>}
-						{!content && <p className="text-sm text-amber-600 mt-2">Missing: content</p>}
+					<div className="text-center max-w-md">
+						{renderError ? (
+							<>
+								<p className="text-lg mb-2 text-red-600">Render error</p>
+								<p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg p-3 font-mono text-left break-all">
+									{renderError}
+								</p>
+							</>
+						) : (
+							<>
+								<p className="text-lg mb-2">No preview available</p>
+								<p className="text-sm">
+									Select a template, theme, and content JSON file to see the preview.
+								</p>
+								{!template && <p className="text-sm text-amber-600 mt-2">Missing: template</p>}
+								{!theme && <p className="text-sm text-amber-600 mt-2">Missing: theme</p>}
+								{!content && <p className="text-sm text-amber-600 mt-2">Missing: content</p>}
+							</>
+						)}
 					</div>
 				</div>
 			)}

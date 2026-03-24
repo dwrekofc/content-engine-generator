@@ -25,6 +25,12 @@ export type {
 	LayoutBounds,
 	PositionedElement,
 } from "./lib/layout-engine/types";
+// Preview Dev Server
+export {
+	type DevServerInstance,
+	type DevServerOptions,
+	startDevServer,
+} from "./lib/preview/dev-server";
 // HTML Renderer
 export {
 	type RenderHTMLOptions,
@@ -51,11 +57,5 @@ export {
 	TemplateSchema,
 } from "./lib/schemas/template-schema";
 export { sectionOverrideToCSS, themeToCSS } from "./lib/themes/theme-to-css";
-// Preview Dev Server
-export {
-	type DevServerInstance,
-	type DevServerOptions,
-	startDevServer,
-} from "./lib/preview/dev-server";
 // API Server
 export { type APIServerInstance, startAPIServer } from "./server/api";
