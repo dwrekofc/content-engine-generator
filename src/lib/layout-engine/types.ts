@@ -5,6 +5,20 @@ export interface CanvasSize {
 	height: number;
 }
 
+// ── Per-format canvas size constants ────────────────────────────────
+// Spec: "PPTX=10×7.5in, PDF=A4 (8.27×11.69in), HTML=fixed width"
+// PPTX uses 96 DPI → 10in × 96 = 960px, 7.5in × 96 = 720px
+// (PptxGenJS native unit is inches; these are the pixel equivalents for layout)
+
+/** PPTX canvas: 10×7.5 inches at 96 DPI = 960×720 px */
+export const CANVAS_PPTX: CanvasSize = { width: 960, height: 720 };
+
+/** PDF canvas: A4 at 72 DPI = 595.28×841.89 pt */
+export const CANVAS_PDF_A4: CanvasSize = { width: 595.28, height: 841.89 };
+
+/** HTML canvas: default fixed width 1280×720 px */
+export const CANVAS_HTML: CanvasSize = { width: 1280, height: 720 };
+
 export type ElementType = "page" | "section" | "field" | "card" | "card-field";
 
 /**

@@ -36,9 +36,12 @@
 						{
 							"cardId": "feature-card-1",
 							"fields": {
+								"fc1-bg": { "type": "background", "value": "#f0f9ff" },
 								"fc1-icon": { "type": "featured-content", "src": "/assets/icon-speed.svg", "alt": "Speed icon" },
 								"fc1-title": { "type": "title", "text": "Lightning Fast" },
-								"fc1-desc": { "type": "paragraph", "text": "Our platform processes requests in milliseconds, ensuring your team never waits." }
+								"fc1-subtitle": { "type": "subtitle", "text": "Sub-millisecond responses" },
+								"fc1-desc": { "type": "paragraph", "text": "Our platform processes requests in milliseconds, ensuring your team never waits." },
+								"fc1-cta": { "type": "button", "text": "Learn More", "url": "https://example.com/speed" }
 							}
 						},
 						{

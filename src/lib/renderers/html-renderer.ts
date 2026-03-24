@@ -117,10 +117,10 @@ body {
 }
 .ce-page {
   width: ${canvasSize.width}px;
-  min-height: ${canvasSize.height}px;
+  height: ${canvasSize.height}px;
   background: var(--color-background, #ffffff);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 .ce-page + .ce-page {
   margin-top: 32px;

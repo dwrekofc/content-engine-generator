@@ -92,7 +92,7 @@ describe("renderHTML — full document", () => {
 	test("uses html canvas size by default", () => {
 		const html = renderHTML(template, theme, content);
 		expect(html).toContain("width: 1280px");
-		expect(html).toContain("min-height: 720px");
+		expect(html).toContain("height: 720px");
 	});
 });
 
@@ -110,7 +110,7 @@ describe("renderHTML — canvas size", () => {
 			canvasHeight: 1080,
 		});
 		expect(html).toContain("width: 1920px");
-		expect(html).toContain("min-height: 1080px");
+		expect(html).toContain("height: 1080px");
 	});
 
 	test("falls back to defaults when no canvas size", () => {
@@ -119,7 +119,7 @@ describe("renderHTML — canvas size", () => {
 		const th = makeMinimalTheme();
 		const html = renderHTML(t, th, c);
 		expect(html).toContain("width: 1280px");
-		expect(html).toContain("min-height: 720px");
+		expect(html).toContain("height: 720px");
 	});
 });
 

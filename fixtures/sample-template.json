@@ -55,9 +55,12 @@
 						{
 							"id": "feature-card-1",
 							"fields": [
+								{ "id": "fc1-bg", "type": "background", "required": false },
 								{ "id": "fc1-icon", "type": "featured-content", "required": true },
 								{ "id": "fc1-title", "type": "title", "required": true },
-								{ "id": "fc1-desc", "type": "paragraph", "required": true }
+								{ "id": "fc1-subtitle", "type": "subtitle", "required": false },
+								{ "id": "fc1-desc", "type": "paragraph", "required": true },
+								{ "id": "fc1-cta", "type": "button", "required": false }
 							]
 						},
 						{

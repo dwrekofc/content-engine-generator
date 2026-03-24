@@ -112,7 +112,7 @@ function renderHTMLForPDF(
 @media print {
   body { background: none; margin: 0; }
   .ce-document { width: 100%; margin: 0; }
-  .ce-page { min-height: auto; width: 100%; overflow: visible; }
+  .ce-page { height: auto; width: 100%; overflow: visible; }
   .ce-page + .ce-page {
     break-before: page;
     margin-top: 0;

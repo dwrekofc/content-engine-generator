@@ -5,7 +5,7 @@
 > **Status:** Spec compliance audit complete — 8 gaps resolved. Phase 7 (Integration & Polish) complete. Phase 5-3 (HTML Static Generator) complete. Phase 5-2 (PDF Generator) complete. Phase 5-1 (PPTX Generator) complete. Phase 3 (HTML Renderer) complete. Phase 3-4 (Visual Fidelity Diff Tests) complete. Phase 4-1 (HTML Preview Dev Server) complete. Phase 4-2 (Overflow Detection) complete. Phase 2 (Layout Engine) complete — including flex wrap. Phase 1 (Schemas) complete. Phase 0 scaffolding complete. Phase 6-1 (App Shell) complete. P6-2, P6-3, P6-4 (Template Builder) complete. P6-5 (Content/Preview mode) complete. P6-6 (Generate mode) complete. P7-1, P7-2, P7-3 complete. P6-7 (Element Arrangement Tools) complete — including smart guides and layer order indicators.
 > **Precedence:** reqs-001 > specs > code. Specs conform to reqs. Code mismatches are flagged, not resolved.
 > **Last updated:** 2026-03-23
-> **Last verified:** 2026-03-23 — Full gap analysis (6th pass): 440 tests passing (32 e2e pipeline + 13 PPTX visual fidelity + 14 error handling + 10 PDF + 28 HTML static + 34 visual fidelity + 14 dev server + 17 PPTX + 59 HTML + 87 layout + 65 schemas + 10 API server + 61 arrangement tools + 15 smart guide + 13 flex wrap), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked.
+> **Last verified:** 2026-03-23 — Full gap analysis (7th pass): 3 additional gaps resolved. 440 tests passing (1654 expect() calls), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked.
 
 ### Execution Priority (recommended build order)
 
@@ -364,11 +364,15 @@ All planned items are complete. No remaining unblocked work for Phase 1.
 - **PPTX Generator `featured-content-caption`** now rendered in card context (was silently dropped).
 - **PPTX Generator spacing tokens** now read from `theme.spacing` and applied as text box margins. Previously hardcoded to 0.
 - **Dev server CLI entry point** added at `src/server/preview.ts` with `bun run dev:preview` script.
+- **Sample fixture now exercises all 6 card field types** (previously missing subtitle, button, background on cards) — AC #6 fully satisfied.
+- **Per-format canvas size constants** (CANVAS_PPTX, CANVAS_PDF_A4, CANVAS_HTML) now exported from layout engine types.
+- **HTML renderer `.ce-page`** changed from `min-height` to `height` with `overflow: visible` — fixed-canvas design principle compliance.
 
 ---
 
 ## Notes
 
+- **Spec compliance audit (2026-03-23, 7th pass).** 3 gaps resolved: (1) Sample fixture now exercises all 6 card field types — added subtitle, button, background fields to feature-card-1 with matching content values. (2) Per-format canvas size constants (CANVAS_PPTX, CANVAS_PDF_A4, CANVAS_HTML) exported from layout-engine/types.ts and barrel exports. (3) HTML renderer .ce-page changed from min-height to height with overflow: visible for fixed-canvas design principle compliance; PDF generator print override updated to match. Tests updated. 440 tests passing, 1654 expect() calls.
 - **Spec compliance audit (2026-03-23, 6th pass).** 3 gaps resolved: (1) Generate mode API now calls `generateHTMLStatic` instead of `renderHTML` — multi-page templates return a zip with navigation and assets; single-page returns HTML directly. (2) Puck editor now remounts when template ID changes via React `key` prop — loading a different template file re-initializes the editor. (3) Layer order z-index badges now appear in both free-position and stack containers (previously only free-position). Frontend `GenerateMode` updated to read Content-Type/Content-Disposition from API response for correct download filenames. 440 tests passing.
 - **Spec compliance audit (2026-03-23, 5th pass).** 4 additional gaps resolved: (1) HTML static generator now collects background image assets (not just featured-content), (2) barrel exports completed — all sub-schemas from content-schema.ts and template-schema.ts now exported, (3) theme and content JSON save buttons added to FilePickerBar, (4) Section schema and template builder now support `required` field for marking sections required/optional. 2 new tests added (background asset collection). Total: 440 tests passing.
 - **Spec compliance audit (2026-03-23).** 8 spec-vs-implementation gaps found and resolved: (1) `ce-section--block` CSS rule missing, (2) `<figcaption>` not in `<figure>`, (3) stack z-index for child sections, (4) PPTX card `featured-content-caption` missing, (5) PPTX spacing tokens not applied, (6) no dev server CLI entry point, (7) barrel exports incomplete, (8) overflow detection scope verified (already correct — all containers use `.ce-section` base class). Remaining Puck API limitations documented: no multi-select, no drag-time smart guides, no template reload after mount.

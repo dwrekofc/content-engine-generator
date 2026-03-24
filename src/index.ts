@@ -26,12 +26,15 @@ export {
 	layoutSectionPrimitive,
 	layoutStackPrimitive,
 } from "./lib/layout-engine/primitives/index";
-export type {
-	CanvasSize,
-	ElementType,
-	LayoutBounds,
-	PositionedElement,
-	SizedItem,
+export {
+	CANVAS_HTML,
+	CANVAS_PDF_A4,
+	CANVAS_PPTX,
+	type CanvasSize,
+	type ElementType,
+	type LayoutBounds,
+	type PositionedElement,
+	type SizedItem,
 } from "./lib/layout-engine/types";
 // Preview Dev Server
 export {
