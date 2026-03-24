@@ -188,6 +188,152 @@ describe("layoutFlexPrimitive", () => {
 	test("empty items returns empty array", () => {
 		expect(layoutFlexPrimitive([], bounds, { direction: "row" })).toEqual([]);
 	});
+
+	describe("row wrap", () => {
+		test("items that fit in one line stay on one line", () => {
+			const items = makeItems(2, 40, 400);
+			const config: FlexConfig = { direction: "row", wrap: true };
+			const result = layoutFlexPrimitive(items, bounds, config);
+
+			expect(result).toHaveLength(2);
+			expect(result[0].y).toBe(0);
+			expect(result[1].y).toBe(0);
+			expect(result[0].width).toBe(400);
+			expect(result[1].width).toBe(400);
+		});
+
+		test("items exceeding width wrap to next line", () => {
+			// 3 items at 400px each in 1000px container → 2 fit, 1 wraps
+			const items = makeItems(3, 40, 400);
+			const config: FlexConfig = { direction: "row", wrap: true, gap: 20 };
+			const result = layoutFlexPrimitive(items, bounds, config);
+
+			expect(result).toHaveLength(3);
+			// Line 1: items 0, 1 (400 + 20 + 400 = 820 ≤ 1000)
+			expect(result[0].y).toBe(0);
+			expect(result[1].y).toBe(0);
+			expect(result[0].x).toBe(0);
+			expect(result[1].x).toBe(420);
+			// Line 2: item 2 wraps
+			expect(result[2].y).toBe(40 + 20); // lineHeight(40) + gap(20)
+			expect(result[2].x).toBe(0);
+		});
+
+		test("wrap respects gap between lines", () => {
+			// 4 items at 600px each in 1000px → 1 per line
+			const items = makeItems(4, 50, 600);
+			const config: FlexConfig = { direction: "row", wrap: true, gap: 10 };
+			const result = layoutFlexPrimitive(items, bounds, config);
+
+			expect(result[0].y).toBe(0);
+			expect(result[1].y).toBe(60); // 50 + 10
+			expect(result[2].y).toBe(120); // 60 + 50 + 10
+			expect(result[3].y).toBe(180);
+		});
+
+		test("wrap with cross-axis alignment per line", () => {
+			// Mixed heights on the same line: center alignment
+			const items: SizedItem[] = [
+				{ intrinsicWidth: 400, intrinsicHeight: 30 },
+				{ intrinsicWidth: 400, intrinsicHeight: 60 },
+			];
+			const config: FlexConfig = { direction: "row", wrap: true, align: "center" };
+			const result = layoutFlexPrimitive(items, bounds, config);
+
+			// Line height = max(30, 60) = 60
+			// First item centered: y = (60-30)/2 = 15
+			expect(result[0].y).toBeCloseTo(15, 5);
+			expect(result[0].height).toBe(30);
+			// Second item fills line height center: y = 0
+			expect(result[1].y).toBe(0);
+			expect(result[1].height).toBe(60);
+		});
+
+		test("wrap with offset bounds", () => {
+			const items = makeItems(3, 40, 500);
+			const config: FlexConfig = { direction: "row", wrap: true, gap: 10 };
+			const result = layoutFlexPrimitive(items, offsetBounds, config);
+
+			// offsetBounds: x=100, y=200, w=800, h=400
+			// Line 1: item 0 (500), item 1 won't fit (500 + 10 + 500 > 800)
+			expect(result[0].x).toBe(100);
+			expect(result[0].y).toBe(200);
+			expect(result[1].x).toBe(100);
+			expect(result[1].y).toBe(250); // 200 + 40 + 10
+			expect(result[2].x).toBe(100);
+			expect(result[2].y).toBe(300); // 250 + 40 + 10
+		});
+	});
+
+	describe("column wrap", () => {
+		test("items that fit in one column stay in one column", () => {
+			const items = makeItems(3, 100, 200);
+			const config: FlexConfig = { direction: "column", wrap: true };
+			const result = layoutFlexPrimitive(items, bounds, config);
+
+			expect(result).toHaveLength(3);
+			// All in same column (100*3 = 300 ≤ 500)
+			expect(result[0].x).toBe(0);
+			expect(result[1].x).toBe(0);
+			expect(result[2].x).toBe(0);
+		});
+
+		test("items exceeding height wrap to next column", () => {
+			// 5 items at 200px height in 500px container → 2 fit, then wrap
+			const items = makeItems(5, 200, 100);
+			const config: FlexConfig = { direction: "column", wrap: true, gap: 20 };
+			const result = layoutFlexPrimitive(items, bounds, config);
+
+			// Col 1: items 0, 1 (200 + 20 + 200 = 420 ≤ 500)
+			expect(result[0].x).toBe(0);
+			expect(result[0].y).toBe(0);
+			expect(result[1].x).toBe(0);
+			expect(result[1].y).toBe(220);
+			// Col 2: items 2, 3
+			expect(result[2].x).toBe(100 + 20); // colWidth + gap
+			expect(result[2].y).toBe(0);
+			expect(result[3].x).toBe(120);
+			expect(result[3].y).toBe(220);
+			// Col 3: item 4
+			expect(result[4].x).toBe(240);
+			expect(result[4].y).toBe(0);
+		});
+
+		test("column wrap with stretch alignment (default)", () => {
+			const items: SizedItem[] = [
+				{ intrinsicWidth: 80, intrinsicHeight: 300 },
+				{ intrinsicWidth: 120, intrinsicHeight: 300 },
+			];
+			const config: FlexConfig = { direction: "column", wrap: true };
+			const result = layoutFlexPrimitive(items, bounds, config);
+
+			// Both fit in one column (300+300 ≤ 500... no, 600 > 500)
+			// Item 0 in col 1, item 1 in col 2
+			// Col 1 width = max(80) = 80, stretch → width = 80
+			// Actually stretch means fill column width (which is max intrinsic)
+			expect(result[0].x).toBe(0);
+			expect(result[0].width).toBe(80); // stretch fills colWidth=80
+			expect(result[1].x).toBe(80); // no gap
+			expect(result[1].width).toBe(120);
+		});
+
+		test("column wrap with center alignment", () => {
+			const items: SizedItem[] = [
+				{ intrinsicWidth: 50, intrinsicHeight: 300 },
+				{ intrinsicWidth: 100, intrinsicHeight: 300 },
+			];
+			const config: FlexConfig = { direction: "column", wrap: true, align: "center" };
+			// 300+300 > 500, so 1 per column
+			const result = layoutFlexPrimitive(items, bounds, config);
+
+			// Col 1: width=50, item width=50 → centered at 0 + (50-50)/2 = 0
+			expect(result[0].x).toBe(0);
+			expect(result[0].width).toBe(50);
+			// Col 2: width=100, starts at x=50
+			expect(result[1].x).toBe(50);
+			expect(result[1].width).toBe(100);
+		});
+	});
 });
 
 // ── Grid primitive ─────────────────────────────────────────────────

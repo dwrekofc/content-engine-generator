@@ -9,7 +9,6 @@
 
 import { describe, expect, test } from "bun:test";
 import {
-	type Rect,
 	alignHorizontal,
 	alignVertical,
 	bringForward,
@@ -22,6 +21,7 @@ import {
 	matchSize,
 	matchWidth,
 	nudge,
+	type Rect,
 	reorder,
 	sendBackward,
 	sendToBack,

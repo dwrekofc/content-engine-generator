@@ -171,9 +171,7 @@ function makeFieldRender(typeName: string, color: string) {
 			>
 				<span style={{ ...fieldLabel, color }}>{typeName}</span>
 				{props.required && <span style={{ color: "#ef4444", fontSize: 10 }}>*</span>}
-				{props.fieldId && (
-					<span style={{ fontSize: 9, color: "#94a3b8" }}>({props.fieldId})</span>
-				)}
+				{props.fieldId && <span style={{ fontSize: 9, color: "#94a3b8" }}>({props.fieldId})</span>}
 			</div>
 		);
 	};

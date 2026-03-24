@@ -11,25 +11,25 @@
  * is selected.
  */
 
-import { usePuck } from "@measured/puck";
 import type { ComponentData, Data } from "@measured/puck";
+import { usePuck } from "@measured/puck";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	type AlignReference,
-	type GuideLine,
-	type HAlign,
-	type Rect,
-	type VAlign,
 	alignHorizontal,
 	alignVertical,
 	distributeHorizontal,
 	distributeVertical,
+	type GuideLine,
+	type HAlign,
 	matchHeight,
 	matchSize,
 	matchWidth,
 	nudge,
+	type Rect,
 	snapRectToGrid,
 	snapToGuides,
+	type VAlign,
 } from "./arrangement-utils";
 import { SmartGuideOverlay } from "./SmartGuideOverlay";
 
@@ -208,9 +208,7 @@ function updateSiblingsInData(
 ): Data {
 	return {
 		...data,
-		content: data.content.map((comp) =>
-			updateSlotInTree(comp, parentId, slotName, updater),
-		),
+		content: data.content.map((comp) => updateSlotInTree(comp, parentId, slotName, updater)),
 	};
 }
 
@@ -287,7 +285,7 @@ export function ArrangementToolbar() {
 	// Clear guides when selection changes
 	useEffect(() => {
 		setActiveGuides([]);
-	}, [selected?.props?.id]);
+	}, []);
 
 	const setData = useCallback(
 		(newData: Data) => {
@@ -321,7 +319,17 @@ export function ArrangementToolbar() {
 
 			setData(updateComponentInData(data, id, (comp) => applyRect(comp, newRect)));
 		},
-		[selected, data, snapEnabled, gridSize, smartGuidesEnabled, isFreePos, getSiblingRects, flashGuides, setData],
+		[
+			selected,
+			data,
+			snapEnabled,
+			gridSize,
+			smartGuidesEnabled,
+			isFreePos,
+			getSiblingRects,
+			flashGuides,
+			setData,
+		],
 	);
 
 	// ── Layer order ──────────────────────────────────────────────────
@@ -330,38 +338,31 @@ export function ArrangementToolbar() {
 		(direction: "up" | "down" | "top" | "bottom") => {
 			if (!selected?.props?.id || !parentCtx) return;
 			const { parent, slotName, siblings } = parentCtx;
-			const idx = siblings.findIndex(
-				(s) => s.props?.id === (selected.props.id as string),
-			);
+			const idx = siblings.findIndex((s) => s.props?.id === (selected.props.id as string));
 			if (idx === -1) return;
 
 			setData(
-				updateSiblingsInData(
-					data,
-					parent.props.id as string,
-					slotName,
-					(sibs) => {
-						const arr = [...sibs];
-						const [item] = arr.splice(idx, 1);
-						let target: number;
-						switch (direction) {
-							case "up":
-								target = Math.min(idx + 1, arr.length);
-								break;
-							case "down":
-								target = Math.max(idx - 1, 0);
-								break;
-							case "top":
-								target = arr.length;
-								break;
-							case "bottom":
-								target = 0;
-								break;
-						}
-						arr.splice(target, 0, item);
-						return arr;
-					},
-				),
+				updateSiblingsInData(data, parent.props.id as string, slotName, (sibs) => {
+					const arr = [...sibs];
+					const [item] = arr.splice(idx, 1);
+					let target: number;
+					switch (direction) {
+						case "up":
+							target = Math.min(idx + 1, arr.length);
+							break;
+						case "down":
+							target = Math.max(idx - 1, 0);
+							break;
+						case "top":
+							target = arr.length;
+							break;
+						case "bottom":
+							target = 0;
+							break;
+					}
+					arr.splice(target, 0, item);
+					return arr;
+				}),
 			);
 		},
 		[selected, parentCtx, data, setData],
@@ -386,11 +387,8 @@ export function ArrangementToolbar() {
 			if (vAlign) aligned = alignVertical(aligned, vAlign, alignRef, parentRect);
 
 			setData(
-				updateSiblingsInData(
-					data,
-					parent.props.id as string,
-					slotName,
-					(sibs) => sibs.map((s, i) => applyRect(s, aligned[i])),
+				updateSiblingsInData(data, parent.props.id as string, slotName, (sibs) =>
+					sibs.map((s, i) => applyRect(s, aligned[i])),
 				),
 			);
 		},
@@ -405,16 +403,11 @@ export function ArrangementToolbar() {
 			const { parent, slotName, siblings } = parentCtx;
 			const rects = siblings.map(getRect);
 			const distributed =
-				axis === "horizontal"
-					? distributeHorizontal(rects)
-					: distributeVertical(rects);
+				axis === "horizontal" ? distributeHorizontal(rects) : distributeVertical(rects);
 
 			setData(
-				updateSiblingsInData(
-					data,
-					parent.props.id as string,
-					slotName,
-					(sibs) => sibs.map((s, i) => applyRect(s, distributed[i])),
+				updateSiblingsInData(data, parent.props.id as string, slotName, (sibs) =>
+					sibs.map((s, i) => applyRect(s, distributed[i])),
 				),
 			);
 		},
@@ -436,11 +429,8 @@ export function ArrangementToolbar() {
 						: matchSize(rects);
 
 			setData(
-				updateSiblingsInData(
-					data,
-					parent.props.id as string,
-					slotName,
-					(sibs) => sibs.map((s, i) => applyRect(s, matched[i])),
+				updateSiblingsInData(data, parent.props.id as string, slotName, (sibs) =>
+					sibs.map((s, i) => applyRect(s, matched[i])),
 				),
 			);
 		},
@@ -476,14 +466,7 @@ export function ArrangementToolbar() {
 			},
 		};
 
-		setData(
-			updateSiblingsInData(
-				data,
-				parent.props.id as string,
-				slotName,
-				() => [groupSection],
-			),
-		);
+		setData(updateSiblingsInData(data, parent.props.id as string, slotName, () => [groupSection]));
 	}, [parentCtx, isFreePos, data, setData]);
 
 	const ungroupSelected = useCallback(() => {
@@ -493,22 +476,15 @@ export function ArrangementToolbar() {
 		if (!Array.isArray(children) || children.length === 0) return;
 
 		const { parent, slotName, siblings } = parentCtx;
-		const idx = siblings.findIndex(
-			(s) => s.props?.id === (selected.props.id as string),
-		);
+		const idx = siblings.findIndex((s) => s.props?.id === (selected.props.id as string));
 		if (idx === -1) return;
 
 		setData(
-			updateSiblingsInData(
-				data,
-				parent.props.id as string,
-				slotName,
-				(sibs) => {
-					const result = [...sibs];
-					result.splice(idx, 1, ...children);
-					return result;
-				},
-			),
+			updateSiblingsInData(data, parent.props.id as string, slotName, (sibs) => {
+				const result = [...sibs];
+				result.splice(idx, 1, ...children);
+				return result;
+			}),
 		);
 	}, [selected, parentCtx, data, setData]);
 
@@ -517,7 +493,7 @@ export function ArrangementToolbar() {
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
 			if (!selected?.props?.id || !isFreePos) return;
-			const step = e.shiftKey ? (snapEnabled ? gridSize : 10) : (snapEnabled ? gridSize : 1);
+			const step = e.shiftKey ? (snapEnabled ? gridSize : 10) : snapEnabled ? gridSize : 1;
 			let dx = 0;
 			let dy = 0;
 
@@ -554,7 +530,17 @@ export function ArrangementToolbar() {
 
 			setData(updateComponentInData(data, id, (comp) => applyRect(comp, nudged)));
 		},
-		[selected, isFreePos, snapEnabled, gridSize, smartGuidesEnabled, getSiblingRects, flashGuides, data, setData],
+		[
+			selected,
+			isFreePos,
+			snapEnabled,
+			gridSize,
+			smartGuidesEnabled,
+			getSiblingRects,
+			flashGuides,
+			data,
+			setData,
+		],
 	);
 
 	// ── Render ───────────────────────────────────────────────────────
@@ -565,7 +551,7 @@ export function ArrangementToolbar() {
 
 	return (
 		// biome-ignore lint/a11y/noNoninteractiveTabindex: toolbar needs focus for keyboard nudge
-		<div style={toolbarStyle} onKeyDown={handleKeyDown} tabIndex={0}>
+		<div role="toolbar" style={toolbarStyle} onKeyDown={handleKeyDown} tabIndex={0}>
 			{/* Position inputs */}
 			<div style={sectionStyle}>
 				<span style={labelStyle}>Position</span>
@@ -614,16 +600,36 @@ export function ArrangementToolbar() {
 							</span>
 						) : null;
 					})()}
-					<button type="button" style={btnStyle} onClick={() => moveLayer("top")} title="Bring to Front">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => moveLayer("top")}
+						title="Bring to Front"
+					>
 						⤒
 					</button>
-					<button type="button" style={btnStyle} onClick={() => moveLayer("up")} title="Bring Forward">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => moveLayer("up")}
+						title="Bring Forward"
+					>
 						↑
 					</button>
-					<button type="button" style={btnStyle} onClick={() => moveLayer("down")} title="Send Backward">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => moveLayer("down")}
+						title="Send Backward"
+					>
 						↓
 					</button>
-					<button type="button" style={btnStyle} onClick={() => moveLayer("bottom")} title="Send to Back">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => moveLayer("bottom")}
+						title="Send to Back"
+					>
 						⤓
 					</button>
 				</div>
@@ -641,22 +647,52 @@ export function ArrangementToolbar() {
 						<option value="selection">Selection</option>
 						<option value="parent">Parent</option>
 					</select>
-					<button type="button" style={btnStyle} onClick={() => applyAlignment("left")} title="Align Left">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => applyAlignment("left")}
+						title="Align Left"
+					>
 						⫷
 					</button>
-					<button type="button" style={btnStyle} onClick={() => applyAlignment("center")} title="Align Center H">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => applyAlignment("center")}
+						title="Align Center H"
+					>
 						⫿
 					</button>
-					<button type="button" style={btnStyle} onClick={() => applyAlignment("right")} title="Align Right">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => applyAlignment("right")}
+						title="Align Right"
+					>
 						⫸
 					</button>
-					<button type="button" style={btnStyle} onClick={() => applyAlignment(undefined, "top")} title="Align Top">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => applyAlignment(undefined, "top")}
+						title="Align Top"
+					>
 						⊤
 					</button>
-					<button type="button" style={btnStyle} onClick={() => applyAlignment(undefined, "middle")} title="Align Middle V">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => applyAlignment(undefined, "middle")}
+						title="Align Middle V"
+					>
 						⊶
 					</button>
-					<button type="button" style={btnStyle} onClick={() => applyAlignment(undefined, "bottom")} title="Align Bottom">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => applyAlignment(undefined, "bottom")}
+						title="Align Bottom"
+					>
 						⊥
 					</button>
 				</div>
@@ -666,10 +702,20 @@ export function ArrangementToolbar() {
 			{isFreePos && parentCtx && parentCtx.siblings.length >= 3 && (
 				<div style={sectionStyle}>
 					<span style={labelStyle}>Distribute</span>
-					<button type="button" style={btnStyle} onClick={() => applyDistribution("horizontal")} title="Distribute Horizontal">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => applyDistribution("horizontal")}
+						title="Distribute Horizontal"
+					>
 						⫾ H
 					</button>
-					<button type="button" style={btnStyle} onClick={() => applyDistribution("vertical")} title="Distribute Vertical">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => applyDistribution("vertical")}
+						title="Distribute Vertical"
+					>
 						⫾ V
 					</button>
 				</div>
@@ -679,13 +725,28 @@ export function ArrangementToolbar() {
 			{isFreePos && (
 				<div style={sectionStyle}>
 					<span style={labelStyle}>Match</span>
-					<button type="button" style={btnStyle} onClick={() => applySizeMatch("width")} title="Match Width">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => applySizeMatch("width")}
+						title="Match Width"
+					>
 						W
 					</button>
-					<button type="button" style={btnStyle} onClick={() => applySizeMatch("height")} title="Match Height">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => applySizeMatch("height")}
+						title="Match Height"
+					>
 						H
 					</button>
-					<button type="button" style={btnStyle} onClick={() => applySizeMatch("both")} title="Match Both">
+					<button
+						type="button"
+						style={btnStyle}
+						onClick={() => applySizeMatch("both")}
+						title="Match Both"
+					>
 						W+H
 					</button>
 				</div>
