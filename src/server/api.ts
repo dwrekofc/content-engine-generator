@@ -1,7 +1,10 @@
+import { readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { ZodError } from "zod";
+import { generateHTMLStatic } from "../lib/generators/html-static-generator";
 import { generatePDF } from "../lib/generators/pdf-generator";
 import { generatePPTX } from "../lib/generators/pptx-generator";
-import { renderHTML } from "../lib/renderers/html-renderer";
 import { type BrandTheme, BrandThemeSchema } from "../lib/schemas/brand-theme";
 import { type Content, ContentSchema } from "../lib/schemas/content-schema";
 import { validateContent } from "../lib/schemas/content-validator";
@@ -102,14 +105,46 @@ async function handleGenerate(req: Request): Promise<Response> {
 	const ext = FILE_EXTENSIONS[format];
 
 	if (format === "html-static") {
-		const html = renderHTML(parsedTemplate, parsedTheme, parsedContent);
-		return new Response(html, {
-			headers: {
-				...CORS_HEADERS,
-				"Content-Type": "text/html; charset=utf-8",
-				"Content-Disposition": `attachment; filename="output.${ext}"`,
-			},
-		});
+		const tempDir = join(tmpdir(), `ce-static-${Date.now()}`);
+		try {
+			const result = await generateHTMLStatic(parsedTemplate, parsedTheme, parsedContent, {
+				outputDir: tempDir,
+			});
+
+			if (result.files.length === 1 && result.files[0] === "index.html") {
+				// Single-page: return HTML directly
+				const html = await readFile(join(tempDir, "index.html"), "utf-8");
+				return new Response(html, {
+					headers: {
+						...CORS_HEADERS,
+						"Content-Type": "text/html; charset=utf-8",
+						"Content-Disposition": `attachment; filename="output.${ext}"`,
+					},
+				});
+			}
+
+			// Multi-file output (multi-page or assets) — create zip
+			const zipPath = join(tmpdir(), `ce-output-${Date.now()}.zip`);
+			const proc = Bun.spawn(["zip", "-r", zipPath, ...result.files], {
+				cwd: tempDir,
+				stdout: "ignore",
+				stderr: "ignore",
+			});
+			await proc.exited;
+
+			const zipBuffer = await Bun.file(zipPath).arrayBuffer();
+			await rm(zipPath, { force: true }).catch(() => {});
+
+			return new Response(zipBuffer, {
+				headers: {
+					...CORS_HEADERS,
+					"Content-Type": "application/zip",
+					"Content-Disposition": 'attachment; filename="output.zip"',
+				},
+			});
+		} finally {
+			await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+		}
 	}
 
 	if (format === "pptx") {

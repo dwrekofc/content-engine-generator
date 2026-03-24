@@ -30,6 +30,10 @@ export function PuckEditor({ template, onTemplateChange }: PuckEditorProps) {
 	const [currentTemplate, setCurrentTemplate] = useState<Template | null>(template);
 	const lastDataRef = useRef<Data | null>(null);
 
+	// Key changes when template identity changes, forcing Puck to remount and
+	// reinitialize with the new data (Puck only reads `data` on first mount).
+	const puckKey = useMemo(() => template?.id ?? "empty", [template?.id]);
+
 	const initialData = useMemo(() => {
 		if (template) {
 			try {
@@ -70,6 +74,7 @@ export function PuckEditor({ template, onTemplateChange }: PuckEditorProps) {
 	return (
 		<div className="h-[calc(100vh-100px)]">
 			<Puck
+				key={puckKey}
 				config={puckConfig}
 				data={initialData}
 				onChange={handleChange}

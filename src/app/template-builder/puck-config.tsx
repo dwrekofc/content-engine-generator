@@ -68,9 +68,9 @@ function SlotRender({ children }: { children: ReactNode }) {
  * direct child within a free-position container so the user can see stacking order.
  */
 const layerBadgeCSS = `
-.ce-free-pos { counter-reset: layer-order; }
-.ce-free-pos > * { counter-increment: layer-order; }
-.ce-free-pos > *::after {
+.ce-free-pos, .ce-stack-pos { counter-reset: layer-order; }
+.ce-free-pos > *, .ce-stack-pos > * { counter-increment: layer-order; }
+.ce-free-pos > *::after, .ce-stack-pos > *::after {
   content: "z" counter(layer-order);
   position: absolute;
   top: -6px;
@@ -375,6 +375,8 @@ export const puckConfig: Config = {
 
 				const freeStyle = getFreePositionStyle(props);
 				const isFreePos = layout === "free-position";
+				const isStack = layout === "stack";
+				const hasLayerBadges = isFreePos || isStack;
 
 				return (
 					<div
@@ -386,13 +388,16 @@ export const puckConfig: Config = {
 							...freeStyle,
 						}}
 					>
-						{/* Inject layer badge CSS for free-position containers */}
-						{isFreePos && <style>{layerBadgeCSS}</style>}
+						{/* Inject layer badge CSS for free-position and stack containers */}
+						{hasLayerBadges && <style>{layerBadgeCSS}</style>}
 						<span style={{ ...wireframeLabel, color: borderColor }}>
 							{layout.toUpperCase()}
 							{name ? `: ${name}` : ""}
 						</span>
-						<div style={layoutStyle} className={isFreePos ? "ce-free-pos" : undefined}>
+						<div
+							style={layoutStyle}
+							className={isFreePos ? "ce-free-pos" : isStack ? "ce-stack-pos" : undefined}
+						>
 							<SlotRender>{children()}</SlotRender>
 						</div>
 					</div>

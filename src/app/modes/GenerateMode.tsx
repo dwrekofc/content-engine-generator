@@ -82,10 +82,13 @@ export function GenerateMode({ state, updateState }: GenerateModeProps) {
 			}
 
 			const blob = await response.blob();
-			const ext = FILE_EXTENSIONS[format];
-			const mimeType = MIME_TYPES[format];
-			const typedBlob = new Blob([blob], { type: mimeType });
-			downloadBlob(typedBlob, `output.${ext}`);
+			// Use response headers to determine actual type (API may return zip for multi-file html-static)
+			const contentType = response.headers.get("Content-Type") || MIME_TYPES[format];
+			const contentDisp = response.headers.get("Content-Disposition");
+			const filenameMatch = contentDisp?.match(/filename="([^"]+)"/);
+			const filename = filenameMatch?.[1] || `output.${FILE_EXTENSIONS[format]}`;
+			const typedBlob = new Blob([blob], { type: contentType });
+			downloadBlob(typedBlob, filename);
 
 			setStatus("done");
 			setMessage(`${FORMAT_LABELS[format]} generated and downloaded.`);
