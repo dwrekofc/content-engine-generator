@@ -148,6 +148,11 @@ function layoutSectionRecursive(
 	for (const child of section.children) {
 		const pos = positions[idx++];
 		layoutSectionRecursive(child, pos, section.id, elements);
+		// In stack layout, assign z-index to child section elements too
+		if (section.layout === "stack") {
+			const childEl = elements.find((el) => el.id === child.id);
+			if (childEl) childEl.zIndex = idx - 1;
+		}
 	}
 }
 

@@ -393,10 +393,10 @@ describe("renderHTML — field types", () => {
 		expect(html).toContain('alt="Speed icon"');
 	});
 
-	test("featured-content-caption renders as figcaption", () => {
+	test("featured-content-caption renders as figure with figcaption", () => {
 		const html = renderHTML(template, theme, content);
-		expect(html).toContain('<figcaption class="ce-field ce-field--featured-content-caption"');
-		expect(html).toContain("Real-time analytics dashboard");
+		expect(html).toContain('<figure class="ce-field ce-field--featured-content-caption"');
+		expect(html).toContain("<figcaption>Real-time analytics dashboard</figcaption>");
 	});
 
 	test("background with gradient renders as div with background style", () => {

@@ -130,6 +130,9 @@ body {
   padding: var(--spacing-padding, 24px);
   position: relative;
 }
+.ce-section--block {
+  display: block;
+}
 .ce-section--flex {
   display: flex;
 }
@@ -408,7 +411,7 @@ function renderField(field: Field, value: FieldValue | undefined): string {
 			return `<div class="ce-field ce-field--featured-content" data-field-id="${escapeAttr(field.id)}"><img src="${escapeAttr(value.src)}"${value.alt ? ` alt="${escapeAttr(value.alt)}"` : ""} /></div>\n`;
 
 		case "featured-content-caption":
-			return `<figcaption class="ce-field ce-field--featured-content-caption" data-field-id="${escapeAttr(field.id)}">${escapeHTML(value.text)}</figcaption>\n`;
+			return `<figure class="ce-field ce-field--featured-content-caption" data-field-id="${escapeAttr(field.id)}"><figcaption>${escapeHTML(value.text)}</figcaption></figure>\n`;
 
 		case "background": {
 			const bg = value.value;

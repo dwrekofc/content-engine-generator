@@ -31,5 +31,6 @@ This project is super green field and no one is using it yet. we are focused on 
 - Tailwind CSS 4 uses `@import "tailwindcss"` instead of directives. Plugin-based via @tailwindcss/vite.
 - Vite 8 — use `bunx vite` not `bun run vite`
 - API server for generation: `bun run dev:api` starts on port 3001. Vite proxies `/api/*` to it. Both must run simultaneously for Generate mode to work.
+- Preview dev server: `bun run dev:preview -- --template <path> --theme <path> --content <path>` starts preview with SSE hot-reload on port 3000.
 
 ### Codebase Patterns

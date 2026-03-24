@@ -18,12 +18,20 @@ export {
 	generatePPTX,
 } from "./lib/generators/pptx-generator";
 // Layout Engine
-export { computeLayout } from "./lib/layout-engine/core";
+export { computeLayout, computeSectionIntrinsicHeight } from "./lib/layout-engine/core";
+export {
+	layoutFlexPrimitive,
+	layoutFreePositionPrimitive,
+	layoutGridPrimitive,
+	layoutSectionPrimitive,
+	layoutStackPrimitive,
+} from "./lib/layout-engine/primitives/index";
 export type {
 	CanvasSize,
 	ElementType,
 	LayoutBounds,
 	PositionedElement,
+	SizedItem,
 } from "./lib/layout-engine/types";
 // Preview Dev Server
 export {
@@ -37,7 +45,24 @@ export {
 	renderHTML,
 	renderHTMLFragment,
 } from "./lib/renderers/html-renderer";
-export { type BrandTheme, BrandThemeSchema, type SectionOverride } from "./lib/schemas/brand-theme";
+// Brand Theme Schema
+export {
+	type BrandTheme,
+	BrandThemeSchema,
+	type ButtonStyle,
+	ButtonStyleSchema,
+	type ColorTokens,
+	ColorTokensSchema,
+	type SectionOverride,
+	SectionOverrideSchema,
+	type SpacingTokens,
+	SpacingTokensSchema,
+	type TypographyStyle,
+	TypographyStyleSchema,
+	type TypographyTokens,
+	TypographyTokensSchema,
+} from "./lib/schemas/brand-theme";
+// Content Schema
 export {
 	type Content,
 	type ContentCard,
@@ -47,12 +72,25 @@ export {
 	type FieldValue,
 } from "./lib/schemas/content-schema";
 export { type ContentValidationError, validateContent } from "./lib/schemas/content-validator";
+// Template Schema
 export {
 	type Card,
+	type CardFieldType,
+	CardFieldTypeSchema,
 	type Field,
+	FieldSchema,
+	type FlexConfig,
+	FlexConfigSchema,
+	type FreePositionChild,
+	FreePositionChildSchema,
+	type GridConfig,
+	GridConfigSchema,
 	type LayoutPrimitive,
+	LayoutPrimitiveSchema,
 	type Page,
 	type Section,
+	type SectionFieldType,
+	SectionFieldTypeSchema,
 	type Template,
 	TemplateSchema,
 } from "./lib/schemas/template-schema";

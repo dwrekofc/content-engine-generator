@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bunx vite",
     "dev:api": "bun run src/server/api.ts",
+    "dev:preview": "bun run src/server/preview.ts",
     "dev:lib": "bun run --watch src/index.ts",
     "build": "bunx vite build",
     "build:lib": "bun build src/index.ts --outdir dist",

@@ -112,6 +112,11 @@ interface ResolvedTheme {
 		text: string;
 		accent: string;
 	};
+	spacing: {
+		padding: number;
+		margin: number;
+		gap: number;
+	};
 	button?: ButtonStyle;
 }
 
@@ -119,6 +124,7 @@ function resolveThemeForSection(section: Section, theme: BrandTheme): ResolvedTh
 	const base: ResolvedTheme = {
 		typography: { ...theme.typography },
 		colors: { ...theme.colors },
+		spacing: { ...theme.spacing },
 		button: theme.button ? { ...theme.button } : undefined,
 	};
 
@@ -135,6 +141,10 @@ function mergeOverride(base: ResolvedTheme, override: SectionOverride): Resolved
 
 	if (override.colors) {
 		result.colors = { ...base.colors, ...override.colors };
+	}
+
+	if (override.spacing) {
+		result.spacing = { ...base.spacing, ...override.spacing };
 	}
 
 	if (override.typography) {
@@ -243,17 +253,19 @@ function renderFieldToSlide(
 
 	const box = toInches(pos, scaleX, scaleY);
 
+	const pad = theme.spacing.padding;
+
 	switch (value.type) {
 		case "title":
-			addTextBox(slide, value.text, box, theme.typography.heading, theme.colors.text);
+			addTextBox(slide, value.text, box, theme.typography.heading, theme.colors.text, pad);
 			break;
 
 		case "subtitle":
-			addTextBox(slide, value.text, box, theme.typography.subheading, theme.colors.text);
+			addTextBox(slide, value.text, box, theme.typography.subheading, theme.colors.text, pad);
 			break;
 
 		case "paragraph":
-			addTextBox(slide, value.text, box, theme.typography.body, theme.colors.text);
+			addTextBox(slide, value.text, box, theme.typography.body, theme.colors.text, pad);
 			break;
 
 		case "button":
@@ -271,6 +283,7 @@ function renderFieldToSlide(
 				box,
 				theme.typography.caption ?? theme.typography.body,
 				theme.colors.secondary,
+				pad,
 			);
 			break;
 
@@ -306,6 +319,7 @@ function renderCardToSlide(
 	});
 
 	// Card fields
+	const cardPad = theme.spacing.padding;
 	for (const field of card.fields) {
 		const value = contentCard?.fields[field.id];
 		const fieldPos = posMap.get(field.id);
@@ -315,19 +329,43 @@ function renderCardToSlide(
 
 		switch (value.type) {
 			case "title":
-				addTextBox(slide, value.text, fieldBox, theme.typography.heading, theme.colors.text);
+				addTextBox(
+					slide,
+					value.text,
+					fieldBox,
+					theme.typography.heading,
+					theme.colors.text,
+					cardPad,
+				);
 				break;
 			case "subtitle":
-				addTextBox(slide, value.text, fieldBox, theme.typography.subheading, theme.colors.text);
+				addTextBox(
+					slide,
+					value.text,
+					fieldBox,
+					theme.typography.subheading,
+					theme.colors.text,
+					cardPad,
+				);
 				break;
 			case "paragraph":
-				addTextBox(slide, value.text, fieldBox, theme.typography.body, theme.colors.text);
+				addTextBox(slide, value.text, fieldBox, theme.typography.body, theme.colors.text, cardPad);
 				break;
 			case "button":
 				addButton(slide, value.text, value.url, fieldBox, theme);
 				break;
 			case "featured-content":
 				addImage(slide, value.src, value.alt, fieldBox);
+				break;
+			case "featured-content-caption":
+				addTextBox(
+					slide,
+					value.text,
+					fieldBox,
+					theme.typography.caption ?? theme.typography.body,
+					theme.colors.secondary,
+					cardPad,
+				);
 				break;
 			case "background":
 				addBackground(slide, value.value, fieldBox);
@@ -360,7 +398,10 @@ function addTextBox(
 	box: InchBox,
 	typo: TypographyStyle,
 	color: string,
+	spacingPadding?: number,
 ): void {
+	// Convert spacing padding (CSS px) to PPTX points; fallback to 0
+	const marginPt = spacingPadding ? spacingPadding * PX_TO_PT : 0;
 	slide.addText(text, {
 		x: box.x,
 		y: box.y,
@@ -372,7 +413,7 @@ function addTextBox(
 		bold: isBold(typo.fontWeight),
 		valign: "top",
 		wrap: true,
-		margin: 0,
+		margin: marginPt,
 	});
 }
 
