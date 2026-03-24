@@ -2,10 +2,10 @@
 
 # Implementation Plan — Content Engine Generator
 
-> **Status:** Phase 7 (Integration & Polish) complete. Phase 5-3 (HTML Static Generator) complete. Phase 5-2 (PDF Generator) complete. Phase 5-1 (PPTX Generator) complete. Phase 3 (HTML Renderer) complete. Phase 3-4 (Visual Fidelity Diff Tests) complete. Phase 4-1 (HTML Preview Dev Server) complete. Phase 4-2 (Overflow Detection) complete. Phase 2 (Layout Engine) complete. Phase 1 (Schemas) complete. Phase 0 scaffolding complete. Phase 6-1 (App Shell) complete. P6-2, P6-3, P6-4 (Template Builder) complete. P6-5 (Content/Preview mode) complete. P6-6 (Generate mode) complete. P7-1, P7-2, P7-3 complete. P6-7 (Element Arrangement Tools) complete — including smart guides and layer order indicators.
+> **Status:** Phase 7 (Integration & Polish) complete. Phase 5-3 (HTML Static Generator) complete. Phase 5-2 (PDF Generator) complete. Phase 5-1 (PPTX Generator) complete. Phase 3 (HTML Renderer) complete. Phase 3-4 (Visual Fidelity Diff Tests) complete. Phase 4-1 (HTML Preview Dev Server) complete. Phase 4-2 (Overflow Detection) complete. Phase 2 (Layout Engine) complete — including flex wrap. Phase 1 (Schemas) complete. Phase 0 scaffolding complete. Phase 6-1 (App Shell) complete. P6-2, P6-3, P6-4 (Template Builder) complete. P6-5 (Content/Preview mode) complete. P6-6 (Generate mode) complete. P7-1, P7-2, P7-3 complete. P6-7 (Element Arrangement Tools) complete — including smart guides and layer order indicators.
 > **Precedence:** reqs-001 > specs > code. Specs conform to reqs. Code mismatches are flagged, not resolved.
 > **Last updated:** 2026-03-23
-> **Last verified:** 2026-03-23 — Full gap analysis (4th pass): 429 tests passing (32 e2e pipeline + 13 PPTX visual fidelity + 14 error handling + 10 PDF + 26 HTML static + 34 visual fidelity + 14 dev server + 17 PPTX + 59 HTML + 74 layout + 65 schemas + 10 API server + 61 arrangement tools + 15 smart guide), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked. All source files read and compared against specs — no undocumented gaps found.
+> **Last verified:** 2026-03-23 — Full gap analysis (4th pass): 438 tests passing (32 e2e pipeline + 13 PPTX visual fidelity + 14 error handling + 10 PDF + 26 HTML static + 34 visual fidelity + 14 dev server + 17 PPTX + 59 HTML + 87 layout + 65 schemas + 10 API server + 61 arrangement tools + 15 smart guide + 13 flex wrap), zero type errors. Zero TODOs/FIXMEs/stubs in codebase. All 16 specs accounted for. reqs-001 fully covered; reqs-002–007 correctly parked. All source files read and compared against specs — no undocumented gaps found.
 
 ### Execution Priority (recommended build order)
 
@@ -95,7 +95,7 @@ The shared layout engine is described as "the core IP of the project" in reqs-00
   - ✅ Row and column direction, gap, alignment (start/center/end/stretch)
   - ✅ Row: equal-width distribution, cross-axis alignment
   - ✅ Column: vertical stack with cross-axis alignment
-  - ✅ Wrapping not yet implemented (optional field, not used in fixtures)
+  - ✅ Wrapping support: row wrap (items wrap to next line when exceeding width) and column wrap (items wrap to next column when exceeding height)
 
 - [x] **P2-3: Layout Primitives — Grid** `src/lib/layout-engine/primitives/grid.ts`
   - ✅ NxM grid with gap, ratio-based column/row sizes
@@ -109,7 +109,7 @@ The shared layout engine is described as "the core IP of the project" in reqs-00
   - ✅ Fallback: unpositioned items stack at top
 
 - [x] **P2-6: Layout Engine tests**
-  - ✅ 74 tests: primitive unit tests, core fixture tests, nested composition (grid>flex, flex>stack, free>grid, 3-level deep), multi-page, multi-format canvas
+  - ✅ 87 tests: primitive unit tests, core fixture tests, nested composition (grid>flex, flex>stack, free>grid, 3-level deep), multi-page, multi-format canvas, flex wrap (row wrap + column wrap, +13)
 
 ---
 
@@ -350,7 +350,6 @@ All planned items are complete. No remaining unblocked work for Phase 1.
 
 ## Known Gaps & Limitations (verified 2026-03-23)
 
-- **Flex `wrap` not implemented** in layout engine (`flex.ts`). Schema supports it as optional field, not used in fixtures. Spec mentions wrapping — minor gap, low priority.
 - **PPTX gradient fills** degrade to solid color (first stop). PptxGenJS typed API limitation — documented inline at `pptx-generator.ts:460`.
 - **PPTX non-data-URI images** render as gray placeholder rects. Local/relative paths can't resolve at generation time — documented at `pptx-generator.ts:431`.
 - **Layout engine uses fixed `DEFAULT_FIELD_HEIGHT = 40`** for all field types. Actual rendered height is content-dependent and unknown at layout time. Documented at `core.ts:11-12`.
@@ -361,7 +360,8 @@ All planned items are complete. No remaining unblocked work for Phase 1.
 
 ## Notes
 
-- **P6-7 complete.** ArrangementToolbar with precise positioning, layer order, alignment, distribution, size matching, snap-to-grid, keyboard nudge, grouping, smart guides, and layer order indicators. posX/posY/posWidth/posHeight props added to all Puck components. Wireframe updated for absolute-positioned free-position children with CSS counter layer badges ("z1", "z2"…). Bidirectional converter handles position round-trips. arrangement-utils.ts provides pure spatial utilities including `snapToGuides()` and `collectSnapTargets()`. SmartGuideOverlay renders alignment guide lines (blue edges, amber centers). 61 new tests (arrangement-tools.test.ts, +15 smart guide). Total: 429 tests passing. All Phase 1 items complete.
+- **Flex wrap implemented.** Row wrap (items wrap to next line when exceeding container width) and column wrap (items wrap to next column when exceeding container height) added to `flex.ts`. 13 new tests added covering both wrap directions, multi-line layout, gap application between wrapped lines/columns, and cross-axis alignment per line. Total: 438 tests passing.
+- **P6-7 complete.** ArrangementToolbar with precise positioning, layer order, alignment, distribution, size matching, snap-to-grid, keyboard nudge, grouping, smart guides, and layer order indicators. posX/posY/posWidth/posHeight props added to all Puck components. Wireframe updated for absolute-positioned free-position children with CSS counter layer badges ("z1", "z2"…). Bidirectional converter handles position round-trips. arrangement-utils.ts provides pure spatial utilities including `snapToGuides()` and `collectSnapTargets()`. SmartGuideOverlay renders alignment guide lines (blue edges, amber centers). 61 new tests (arrangement-tools.test.ts, +15 smart guide). Total: 429 tests passing at time of P6-7 completion. All Phase 1 items complete.
 - **P7-1, P7-2, P7-3 complete.** End-to-end pipeline (32 tests), PPTX visual fidelity (13 tests), and error handling (14 tests) all done. API server now returns 400 with structured errors on validation failure. ContentPreviewMode surfaces render errors and validation warnings. Total: 368 tests passing (before P6-7). Phase 7 Integration & Polish is complete.
 - **P6-5 and P6-6 complete.** Content/Preview mode has inline iframe preview with overflow detection + "Open in New Tab" button. Generate mode wired to backend API server (`src/server/api.ts`). API serves all three formats (HTML/PPTX/PDF). Vite proxies /api/* to port 3001. 10 new tests. Total: 309 tests passing.
 - **P6-2, P6-3, P6-4 complete.** Template Builder UI implemented via Puck 0.20.2. Key implementation notes: slot-based nesting (Puck's `slot` field type enables child drop zones for 3+ level nesting); `puck.css` must be imported in the entry point for Puck's UI to render correctly; Puck render functions require `any` types due to Puck's internal generic constraints — TypeScript strict mode tolerates this with targeted `// eslint-disable` comments. Template builder is UI-only, tested via `bun run build` (zero type errors, clean build). Test count remains 299.
@@ -372,7 +372,7 @@ All planned items are complete. No remaining unblocked work for Phase 1.
 - **P5-2 complete.** PDF generator: 10 tests. `generatePDF()` and `generatePDFFromURL()` via Playwright headless Chromium. CSS `break-before: page` for page breaks. A4 default, configurable size + landscape. playwright v1.58.2 is now a runtime dependency. Total: 299 tests passing.
 - **P5-1 complete.** PPTX generator: 17 tests. pptxgenjs v4.0.1 installed.
 - **Phase 3 complete.** HTML renderer (layout + theme + content): 59 tests.
-- **Phase 2 complete.** Layout engine core + all 5 primitives: 74 tests.
+- **Phase 2 complete.** Layout engine core + all 5 primitives: 87 tests (includes 13 flex wrap tests).
 - **Phase 1 complete.** All schemas, validation, theme-to-CSS, fixtures: 65 tests.
 - **Zero technical debt markers.** No TODOs, FIXMEs, stubs, skipped tests, or placeholder implementations in codebase.
 - **Bug fix:** `sectionOverrideToCSS` was missing from `src/index.ts` barrel exports — now exported.
